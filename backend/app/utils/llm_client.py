@@ -5,6 +5,8 @@ LLM客户端封装
 
 import json
 import re
+import time
+import threading
 from typing import Optional, Dict, Any, List
 from openai import OpenAI
 
@@ -13,6 +15,9 @@ from ..config import Config
 
 class LLMClient:
     """LLM客户端"""
+    _request_lock = threading.Lock()
+    _max_retries = 5
+    _retry_delay_seconds = 2.0
     
     def __init__(
         self,
@@ -61,11 +66,29 @@ class LLMClient:
         if response_format:
             kwargs["response_format"] = response_format
         
-        response = self.client.chat.completions.create(**kwargs)
-        content = response.choices[0].message.content
-        # 部分模型（如MiniMax M2.5）会在content中包含<think>思考内容，需要移除
-        content = re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
-        return content
+        last_error = None
+
+        for attempt in range(self._max_retries):
+            try:
+                with self._request_lock:
+                    response = self.client.chat.completions.create(**kwargs)
+                content = response.choices[0].message.content
+                # 部分模型（如MiniMax M2.5）会在content中包含<think>思考内容，需要移除
+                content = re.sub(r'<think>[\s\S]*?</think>', '', content).strip()
+                return content
+            except Exception as e:
+                last_error = e
+                error_text = str(e)
+                is_bridge_busy = (
+                    "Bridge is busy" in error_text
+                    or "'type': 'server_error'" in error_text
+                    or '"type": "server_error"' in error_text
+                )
+                if not is_bridge_busy or attempt == self._max_retries - 1:
+                    raise
+                time.sleep(self._retry_delay_seconds * (attempt + 1))
+
+        raise last_error
     
     def chat_json(
         self,
@@ -100,4 +123,3 @@ class LLMClient:
             return json.loads(cleaned_response)
         except json.JSONDecodeError:
             raise ValueError(f"LLM返回的JSON格式无效: {cleaned_response}")
-

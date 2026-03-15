@@ -1348,7 +1348,7 @@ class ReportAgent:
                 progress_callback(
                     "generating", 
                     int((iteration / max_iterations) * 100),
-                    f"深度检索与撰写中 ({tool_calls_count}/{self.MAX_TOOL_CALLS_PER_SECTION})"
+                    f"Deep retrieval and drafting in progress ({tool_calls_count}/{self.MAX_TOOL_CALLS_PER_SECTION})"
                 )
             
             # 调用LLM

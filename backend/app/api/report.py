@@ -127,7 +127,7 @@ def generate_report():
                     task_id,
                     status=TaskStatus.PROCESSING,
                     progress=0,
-                    message="初始化Report Agent..."
+                    message="Initializing Report Agent..."
                 )
                 
                 # 创建Report Agent

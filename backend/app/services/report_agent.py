@@ -1100,11 +1100,11 @@ class ReportAgent:
                 return json.dumps(result, ensure_ascii=False, indent=2)
             
             else:
-                return f"未知工具: {tool_name}。请使用以下工具之一: insight_forge, panorama_search, quick_search"
+                return f"Unknown tool: {tool_name}. Use one of: insight_forge, panorama_search, quick_search, interview_agents."
                 
         except Exception as e:
             logger.error(f"Tool execution failed: {tool_name}, error: {str(e)}")
-            return f"工具执行失败: {str(e)}"
+            return f"Tool execution failed: {str(e)}"
     
     # 合法的工具名称集合，用于裸 JSON 兜底解析时校验
     VALID_TOOL_NAMES = {"insight_forge", "panorama_search", "quick_search", "interview_agents"}
@@ -1336,7 +1336,8 @@ class ReportAgent:
         tool_calls_count = 0
         max_iterations = 5  # 最大迭代轮数
         min_tool_calls = 3  # 最少工具调用次数
-        conflict_retries = 0  # 工具调用与Final Answer同时出现的连续冲突次数
+        conflict_retries = 0  # Consecutive tool-call/final-answer conflicts
+        insufficient_tool_final_answers = 0  # Consecutive Final Answer responses before minimum tool calls
         used_tools = set()  # 记录已调用过的工具名
         all_tools = {"insight_forge", "panorama_search", "quick_search", "interview_agents"}
 
@@ -1427,6 +1428,23 @@ class ReportAgent:
             if has_final_answer:
                 # 工具调用次数不足，拒绝并要求继续调工具
                 if tool_calls_count < min_tool_calls:
+                    insufficient_tool_final_answers += 1
+                    if insufficient_tool_final_answers >= 1:
+                        final_answer = response.split("Final Answer:")[-1].strip()
+                        logger.warning(
+                            f"Section {section.title} returned Final Answer without enough tool calls "
+                            f"{insufficient_tool_final_answers} times; accepting degraded output"
+                        )
+
+                        if self.report_logger:
+                            self.report_logger.log_section_content(
+                                section_title=section.title,
+                                section_index=section_index,
+                                content=final_answer,
+                                tool_calls_count=tool_calls_count
+                            )
+                        return final_answer
+
                     messages.append({"role": "assistant", "content": response})
                     unused_tools = all_tools - used_tools
                     unused_hint = f"（这些工具还未使用，推荐用一下他们: {', '.join(unused_tools)}）" if unused_tools else ""
@@ -1441,6 +1459,7 @@ class ReportAgent:
                     continue
 
                 # 正常结束
+                insufficient_tool_final_answers = 0
                 final_answer = response.split("Final Answer:")[-1].strip()
                 logger.info(f"Section {section.title} completed (tool calls: {tool_calls_count})")
 
@@ -1497,6 +1516,7 @@ class ReportAgent:
                     )
 
                 tool_calls_count += 1
+                insufficient_tool_final_answers = 0
                 used_tools.add(call['name'])
 
                 # 构建未使用工具提示
@@ -1741,17 +1761,17 @@ class ReportAgent:
                 ReportManager.update_progress(
                     report_id, "generating", 
                     base_progress + int(70 / total_sections),
-                    f"章节 {section.title} 已完成",
+                    f"Section completed: {section.title}",
                     current_section=None,
                     completed_sections=completed_section_titles
                 )
             
             # 阶段3: 组装完整报告
             if progress_callback:
-                progress_callback("generating", 95, "正在组装完整报告...")
+                progress_callback("generating", 95, "Assembling the full report...")
             
             ReportManager.update_progress(
-                report_id, "generating", 95, "正在组装完整报告...",
+                report_id, "generating", 95, "Assembling the full report...",
                 completed_sections=completed_section_titles
             )
             
@@ -1773,12 +1793,12 @@ class ReportAgent:
             # 保存最终报告
             ReportManager.save_report(report)
             ReportManager.update_progress(
-                report_id, "completed", 100, "报告生成完成",
+                report_id, "completed", 100, "Report generation complete",
                 completed_sections=completed_section_titles
             )
             
             if progress_callback:
-                progress_callback("completed", 100, "报告生成完成")
+                progress_callback("completed", 100, "Report generation complete")
             
             logger.info(f"Report generation complete: {report_id}")
             
@@ -1802,7 +1822,7 @@ class ReportAgent:
             try:
                 ReportManager.save_report(report)
                 ReportManager.update_progress(
-                    report_id, "failed", -1, f"报告生成失败: {str(e)}",
+                    report_id, "failed", -1, f"Report generation failed: {str(e)}",
                     completed_sections=completed_section_titles
                 )
             except Exception:

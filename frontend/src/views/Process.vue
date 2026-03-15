@@ -745,6 +745,17 @@ const fetchGraphData = async () => {
     if (projectResponse.success && projectResponse.data.graph_id) {
       const graphId = projectResponse.data.graph_id
       projectData.value = projectResponse.data
+
+      if (projectResponse.data.status === 'graph_completed' && currentPhase.value !== 2) {
+        console.log('✅ Project recovered/completed while polling graph data')
+        currentPhase.value = 2
+        stopPolling()
+        stopGraphPolling()
+        buildProgress.value = {
+          progress: 100,
+          message: '图谱构建完成'
+        }
+      }
       
       // 获取图谱数据
       const graphResponse = await getGraphData(graphId)

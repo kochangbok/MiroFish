@@ -6,6 +6,7 @@
 import os
 import traceback
 import threading
+from datetime import datetime
 from flask import request, jsonify
 
 from . import graph_bp
@@ -20,6 +21,59 @@ from ..models.project import ProjectManager, ProjectStatus
 
 # 获取日志器
 logger = get_logger('mirofish.api')
+
+
+def try_recover_graph_building_project(project):
+    """
+    Recover stale graph_building projects when the in-memory task was lost
+    (for example after a backend restart / debug reloader issue) but the graph
+    already exists in Zep and has data.
+    """
+    try:
+        if project.status != ProjectStatus.GRAPH_BUILDING:
+            return project
+
+        if not project.graph_id:
+            return project
+
+        task_id = project.graph_build_task_id
+        task_exists = bool(task_id and TaskManager().get_task(task_id))
+        if task_exists:
+            return project
+
+        try:
+            updated_at = datetime.fromisoformat(project.updated_at)
+        except Exception:
+            return project
+
+        recovery_after_seconds = int(os.environ.get('GRAPH_STUCK_RECOVERY_SECONDS', '600'))
+        age_seconds = (datetime.now() - updated_at).total_seconds()
+        if age_seconds < recovery_after_seconds:
+            return project
+
+        if not Config.ZEP_API_KEY:
+            return project
+
+        builder = GraphBuilderService(api_key=Config.ZEP_API_KEY)
+        graph_data = builder.get_graph_data(project.graph_id)
+        node_count = graph_data.get("node_count", 0) or len(graph_data.get("nodes", []) or [])
+        edge_count = graph_data.get("edge_count", 0) or len(graph_data.get("edges", []) or [])
+
+        if node_count > 0 or edge_count > 0:
+            logger.warning(
+                f"Recovering stale graph_building project {project.project_id}: "
+                f"task_id={task_id} missing, age={age_seconds:.0f}s, "
+                f"nodes={node_count}, edges={edge_count}"
+            )
+            project.status = ProjectStatus.GRAPH_COMPLETED
+            project.graph_build_task_id = None
+            project.error = None
+            ProjectManager.save_project(project)
+
+    except Exception as e:
+        logger.warning(f"Failed to recover stale project {project.project_id}: {e}")
+
+    return project
 
 
 def allowed_file(filename: str) -> bool:
@@ -45,6 +99,8 @@ def get_project(project_id: str):
             "error": f"项目不存在: {project_id}"
         }), 404
     
+    project = try_recover_graph_building_project(project)
+
     return jsonify({
         "success": True,
         "data": project.to_dict()
@@ -57,7 +113,7 @@ def list_projects():
     列出所有项目
     """
     limit = request.args.get('limit', 50, type=int)
-    projects = ProjectManager.list_projects(limit=limit)
+    projects = [try_recover_graph_building_project(p) for p in ProjectManager.list_projects(limit=limit)]
     
     return jsonify({
         "success": True,

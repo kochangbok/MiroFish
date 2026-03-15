@@ -42,9 +42,14 @@ def main():
     debug = Config.DEBUG
     
     # 启动服务
-    app.run(host=host, port=port, debug=debug, threaded=True)
+    # NOTE:
+    # This backend uses in-memory task tracking plus background threads for graph builds.
+    # Werkzeug's debug reloader starts multiple processes, which can lose task state
+    # and leave the UI stuck in "graph_building" even after Zep finishes processing.
+    # Keep debug mode, but disable the reloader so task state and background threads
+    # stay in a single serving process.
+    app.run(host=host, port=port, debug=debug, threaded=True, use_reloader=False)
 
 
 if __name__ == '__main__':
     main()
-

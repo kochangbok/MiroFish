@@ -15,7 +15,7 @@
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: '图谱', split: '双栏', workbench: '工作台' }[mode] }}
+            {{ modeLabels[mode] }}
           </button>
         </div>
       </div>
@@ -82,16 +82,29 @@ import Step1GraphBuild from '../components/Step1GraphBuild.vue'
 import Step2EnvSetup from '../components/Step2EnvSetup.vue'
 import { generateOntology, getProject, buildGraph, getTaskStatus, getGraphData } from '../api/graph'
 import { getPendingUpload, clearPendingUpload } from '../store/pendingUpload'
+import { useLocale } from '../i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useLocale()
 
 // Layout State
 const viewMode = ref('split') // graph | split | workbench
+const modeLabels = computed(() => ({
+  graph: t('common.view.graph'),
+  split: t('common.view.split'),
+  workbench: t('common.view.workbench')
+}))
 
 // Step State
 const currentStep = ref(1) // 1: 图谱构建, 2: 环境搭建, 3: 开始模拟, 4: 报告生成, 5: 深度互动
-const stepNames = ['图谱构建', '环境搭建', '开始模拟', '报告生成', '深度互动']
+const stepNames = computed(() => [
+  t('workflow.graphBuild.title'),
+  t('workflow.envSetup.title'),
+  t('workflow.simulationRun.title'),
+  t('workflow.report.title'),
+  t('workflow.interaction.title')
+])
 
 // Data State
 const currentProjectId = ref(route.params.projectId)
@@ -130,11 +143,11 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (error.value) return 'Error'
-  if (currentPhase.value >= 2) return 'Ready'
-  if (currentPhase.value === 1) return 'Building Graph'
-  if (currentPhase.value === 0) return 'Generating Ontology'
-  return 'Initializing'
+  if (error.value) return t('common.status.error')
+  if (currentPhase.value >= 2) return t('common.status.ready')
+  if (currentPhase.value === 1) return t('step1.graphBuild')
+  if (currentPhase.value === 0) return t('step1.ontology')
+  return t('common.status.initializing')
 })
 
 // --- Helpers ---
@@ -159,7 +172,7 @@ const toggleMaximize = (target) => {
 const handleNextStep = (params = {}) => {
   if (currentStep.value < 5) {
     currentStep.value++
-    addLog(`进入 Step ${currentStep.value}: ${stepNames[currentStep.value - 1]}`)
+    addLog(`进入 Step ${currentStep.value}: ${stepNames.value[currentStep.value - 1]}`)
     
     // 如果是从 Step 2 进入 Step 3，记录模拟轮数配置
     if (currentStep.value === 3 && params.maxRounds) {
@@ -171,7 +184,7 @@ const handleNextStep = (params = {}) => {
 const handleGoBack = () => {
   if (currentStep.value > 1) {
     currentStep.value--
-    addLog(`返回 Step ${currentStep.value}: ${stepNames[currentStep.value - 1]}`)
+    addLog(`返回 Step ${currentStep.value}: ${stepNames.value[currentStep.value - 1]}`)
   }
 }
 
@@ -411,7 +424,7 @@ onUnmounted(() => {
   flex-direction: column;
   background: #FFF;
   overflow: hidden;
-  font-family: 'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Noto Sans KR', system-ui, sans-serif;
 }
 
 /* Header */

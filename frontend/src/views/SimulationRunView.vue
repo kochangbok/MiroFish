@@ -15,7 +15,7 @@
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: '图谱', split: '双栏', workbench: '工作台' }[mode] }}
+            {{ modeLabels[mode] }}
           </button>
         </div>
       </div>
@@ -23,7 +23,7 @@
       <div class="header-right">
         <div class="workflow-step">
           <span class="step-num">Step 3/5</span>
-          <span class="step-name">开始模拟</span>
+          <span class="step-name">{{ t('workflow.simulationRun.title') }}</span>
         </div>
         <div class="step-divider"></div>
         <span class="status-indicator" :class="statusClass">
@@ -73,9 +73,11 @@ import GraphPanel from '../components/GraphPanel.vue'
 import Step3Simulation from '../components/Step3Simulation.vue'
 import { getProject, getGraphData } from '../api/graph'
 import { getSimulation, getSimulationConfig, stopSimulation, closeSimulationEnv, getEnvStatus } from '../api/simulation'
+import { useLocale } from '../i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useLocale()
 
 // Props
 const props = defineProps({
@@ -84,6 +86,11 @@ const props = defineProps({
 
 // Layout State
 const viewMode = ref('split')
+const modeLabels = computed(() => ({
+  graph: t('common.view.graph'),
+  split: t('common.view.split'),
+  workbench: t('common.view.workbench')
+}))
 
 // Data State
 const currentSimulationId = ref(route.params.simulationId)
@@ -115,9 +122,9 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (currentStatus.value === 'error') return 'Error'
-  if (currentStatus.value === 'completed') return 'Completed'
-  return 'Running'
+  if (currentStatus.value === 'error') return t('common.status.error')
+  if (currentStatus.value === 'completed') return t('common.status.completed')
+  return t('common.status.running')
 })
 
 const isSimulating = computed(() => currentStatus.value === 'processing')
@@ -317,7 +324,7 @@ onUnmounted(() => {
   flex-direction: column;
   background: #FFF;
   overflow: hidden;
-  font-family: 'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Noto Sans KR', system-ui, sans-serif;
 }
 
 /* Header */
@@ -444,4 +451,3 @@ onUnmounted(() => {
   border-right: 1px solid #EAEAEA;
 }
 </style>
-

@@ -5,7 +5,7 @@
       <div class="nav-brand">MIROFISH</div>
       <div class="nav-links">
         <a href="https://github.com/666ghj/MiroFish" target="_blank" class="github-link">
-          GitHub 저장소 보기 <span class="arrow">↗</span>
+          {{ t('home.github') }} <span class="arrow">↗</span>
         </a>
       </div>
     </nav>
@@ -15,21 +15,21 @@
       <section class="hero-section">
         <div class="hero-left">
           <div class="tag-row">
-            <span class="orange-tag">간결하고 범용적인 집단지성 엔진</span>
-            <span class="version-text">/ v0.1-프리뷰</span>
+            <span class="orange-tag">{{ t('home.tag') }}</span>
+            <span class="version-text">{{ t('home.version') }}</span>
           </div>
           
           <h1 class="main-title">
-            원하는 문서를 업로드하고<br>
-            <span class="gradient-text">미래를 즉시 시뮬레이션하세요</span>
+            {{ t('home.titleLine1') }}<br>
+            <span class="gradient-text">{{ t('home.titleLine2') }}</span>
           </h1>
           
           <div class="hero-desc">
             <p>
-              단 한 단락의 텍스트만 있어도 <span class="highlight-bold">MiroFish</span>는 그 안의 현실 단서를 바탕으로 최대 <span class="highlight-orange">수백만 에이전트</span>로 이루어진 평행 세계를 자동 생성합니다. 그리고 상위 시점에서 변수를 주입해, 복잡한 집단 상호작용 속에서 동적인 환경에 맞는 <span class="highlight-code">“국소 최적해”</span>를 탐색합니다.
+              {{ t('home.description') }}
             </p>
             <p class="slogan-text">
-              에이전트 군집 속에서 미래를 미리 실험하고, 수많은 시도 끝에 더 나은 결정을 선택하세요<span class="blinking-cursor">_</span>
+              {{ t('home.slogan') }}<span class="blinking-cursor">_</span>
             </p>
           </div>
            
@@ -53,65 +53,65 @@
         <!-- 左栏：状态与步骤 -->
         <div class="left-panel">
           <div class="panel-header">
-            <span class="status-dot">■</span> 시스템 상태
+            <span class="status-dot">■</span> {{ t('home.systemStatus') }}
           </div>
           
-          <h2 class="section-title">준비 완료</h2>
+          <h2 class="section-title">{{ t('home.ready') }}</h2>
           <p class="section-desc">
-            예측 엔진이 대기 중입니다. 여러 비정형 문서를 업로드해 시뮬레이션을 시작할 수 있습니다.
+            {{ t('home.readyDesc') }}
           </p>
           
           <!-- 数据指标卡片 -->
           <div class="metrics-row">
             <div class="metric-card">
-              <div class="metric-value">낮은 비용</div>
-              <div class="metric-label">일반 시뮬레이션 평균 1회 약 $5</div>
+              <div class="metric-value">{{ t('home.lowCost') }}</div>
+              <div class="metric-label">{{ t('home.lowCostDesc') }}</div>
             </div>
             <div class="metric-card">
-              <div class="metric-value">고확장성</div>
-              <div class="metric-label">최대 수백만 에이전트 시뮬레이션</div>
+              <div class="metric-value">{{ t('home.scalability') }}</div>
+              <div class="metric-label">{{ t('home.scalabilityDesc') }}</div>
             </div>
           </div>
 
           <!-- 项目模拟步骤介绍 (新增区域) -->
           <div class="steps-container">
             <div class="steps-header">
-               <span class="diamond-icon">◇</span> 워크플로우
+               <span class="diamond-icon">◇</span> {{ t('home.workflow') }}
             </div>
             <div class="workflow-list">
               <div class="workflow-item">
                 <span class="step-num">01</span>
                 <div class="step-info">
-                  <div class="step-title">그래프 구축</div>
-                  <div class="step-desc">현실 단서 추출 · 개인/집단 메모리 주입 · GraphRAG 구축</div>
+                  <div class="step-title">{{ t('workflow.graphBuild.title') }}</div>
+                  <div class="step-desc">{{ homeWorkflow.graphBuild }}</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">02</span>
                 <div class="step-info">
-                  <div class="step-title">환경 구성</div>
-                  <div class="step-desc">엔티티/관계 추출 · 에이전트 페르소나 생성 · 시뮬레이션 환경 설정</div>
+                  <div class="step-title">{{ t('workflow.envSetup.title') }}</div>
+                  <div class="step-desc">{{ homeWorkflow.envSetup }}</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">03</span>
                 <div class="step-info">
-                  <div class="step-title">시뮬레이션 시작</div>
-                  <div class="step-desc">두 플랫폼 병렬 시뮬레이션 · 예측 요구 자동 해석 · 시계열 메모리 동적 갱신</div>
+                  <div class="step-title">{{ t('workflow.simulationRun.title') }}</div>
+                  <div class="step-desc">{{ homeWorkflow.simulationRun }}</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">04</span>
                 <div class="step-info">
-                  <div class="step-title">보고서 생성</div>
-                  <div class="step-desc">Report Agent가 다양한 도구로 시뮬레이션 결과를 심층 분석합니다.</div>
+                  <div class="step-title">{{ t('workflow.report.title') }}</div>
+                  <div class="step-desc">{{ homeWorkflow.report }}</div>
                 </div>
               </div>
               <div class="workflow-item">
                 <span class="step-num">05</span>
                 <div class="step-info">
-                  <div class="step-title">심층 상호작용</div>
-                  <div class="step-desc">시뮬레이션 세계의 개별 에이전트 및 Report Agent와 대화할 수 있습니다.</div>
+                  <div class="step-title">{{ t('workflow.interaction.title') }}</div>
+                  <div class="step-desc">{{ homeWorkflow.interaction }}</div>
                 </div>
               </div>
             </div>
@@ -124,8 +124,8 @@
             <!-- 上传区域 -->
             <div class="console-section">
               <div class="console-header">
-                <span class="console-label">01 / 현실 단서</span>
-                <span class="console-meta">지원 형식: PDF, MD, TXT</span>
+                <span class="console-label">{{ t('home.uploadSeed') }}</span>
+                <span class="console-meta">{{ t('home.supportedFormats') }}</span>
               </div>
               
               <div 
@@ -148,8 +148,8 @@
                 
                 <div v-if="files.length === 0" class="upload-placeholder">
                   <div class="upload-icon">↑</div>
-                  <div class="upload-title">파일을 끌어다 놓아 업로드</div>
-                  <div class="upload-hint">또는 클릭해서 파일 선택</div>
+                  <div class="upload-title">{{ t('home.uploadTitle') }}</div>
+                  <div class="upload-hint">{{ t('home.uploadHint') }}</div>
                 </div>
                 
                 <div v-else class="file-list">
@@ -164,23 +164,23 @@
 
             <!-- 分割线 -->
             <div class="console-divider">
-              <span>입력 값</span>
+              <span>{{ t('home.inputParams') }}</span>
             </div>
 
             <!-- 输入区域 -->
             <div class="console-section">
               <div class="console-header">
-                <span class="console-label">>_ 02 / 시뮬레이션 프롬프트</span>
+                <span class="console-label">{{ t('home.promptLabel') }}</span>
               </div>
               <div class="input-wrapper">
                 <textarea
                   v-model="formData.simulationRequirement"
                   class="code-input"
-                  placeholder="// 자연어로 시뮬레이션 또는 예측 요청을 입력하세요. 예: 어떤 공지문을 올리면 여론이 어떻게 바뀔까?"
+                  :placeholder="t('home.promptPlaceholder')"
                   rows="6"
                   :disabled="loading"
                 ></textarea>
-                <div class="model-badge">엔진: MiroFish-V1.0</div>
+                <div class="model-badge">{{ t('home.engine') }}</div>
               </div>
             </div>
 
@@ -191,8 +191,8 @@
                 @click="startSimulation"
                 :disabled="!canSubmit || loading"
               >
-                <span v-if="!loading">엔진 시작</span>
-                <span v-else>초기화 중...</span>
+                <span v-if="!loading">{{ t('home.startEngine') }}</span>
+                <span v-else>{{ t('home.starting') }}</span>
                 <span class="btn-arrow">→</span>
               </button>
             </div>
@@ -210,8 +210,24 @@
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import HistoryDatabase from '../components/HistoryDatabase.vue'
+import { useLocale } from '../i18n'
 
 const router = useRouter()
+const { t, locale } = useLocale()
+
+const homeWorkflow = computed(() => ({
+  graphBuild: t('step1.ontologyDesc'),
+  envSetup: t('step2.agentDesc'),
+  simulationRun: locale.value === 'ko'
+    ? '두 플랫폼 병렬 시뮬레이션 · 예측 요구 자동 해석 · 시계열 메모리 동적 갱신'
+    : 'Parallel dual-platform simulation · automatic prediction parsing · dynamic temporal memory updates',
+  report: locale.value === 'ko'
+    ? 'Report Agent가 다양한 도구로 시뮬레이션 결과를 심층 분석합니다.'
+    : 'Report Agent performs deep analysis on simulation results with a rich toolset.',
+  interaction: locale.value === 'ko'
+    ? '시뮬레이션 세계의 개별 에이전트 및 Report Agent와 대화할 수 있습니다.'
+    : 'Chat with individual agents in the simulated world and with Report Agent.'
+}))
 
 // 表单数据
 const formData = ref({

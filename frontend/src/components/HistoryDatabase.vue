@@ -13,7 +13,7 @@
     <!-- 标题区域 -->
     <div class="section-header">
       <div class="section-line"></div>
-      <span class="section-title">시뮬레이션 기록</span>
+      <span class="section-title">{{ t('history.title') }}</span>
       <div class="section-line"></div>
     </div>
 
@@ -36,16 +36,16 @@
             <span 
               class="status-icon" 
               :class="{ available: project.project_id, unavailable: !project.project_id }"
-              title="그래프 구축"
+              :title="t('history.graphBuild')"
             >◇</span>
             <span 
               class="status-icon available" 
-              title="환경 구성"
+              :title="t('history.envSetup')"
             >◈</span>
             <span 
               class="status-icon" 
               :class="{ available: project.report_id, unavailable: !project.report_id }"
-              title="분석 보고서"
+              :title="t('history.report')"
             >◆</span>
           </div>
         </div>
@@ -67,13 +67,13 @@
             </div>
             <!-- 如果有更多文件，显示提示 -->
             <div v-if="project.files.length > 3" class="files-more">
-              +{{ project.files.length - 3 }} 개 파일
+              +{{ project.files.length - 3 }} {{ t('history.filesSuffix') }}
             </div>
           </div>
           <!-- 无文件时的占位 -->
           <div class="files-empty" v-else>
             <span class="empty-file-icon">◇</span>
-            <span class="empty-file-text">파일 없음</span>
+            <span class="empty-file-text">{{ t('common.label.noFile') }}</span>
           </div>
         </div>
 
@@ -102,7 +102,7 @@
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-state">
       <span class="loading-spinner"></span>
-      <span class="loading-text">불러오는 중...</span>
+      <span class="loading-text">{{ t('history.loading') }}</span>
     </div>
 
     <!-- 历史回放详情弹窗 -->
@@ -126,27 +126,27 @@
             <div class="modal-body">
               <!-- 시뮬레이션 요구사항 -->
               <div class="modal-section">
-                <div class="modal-label">시뮬레이션 요구사항</div>
-                <div class="modal-requirement">{{ selectedProject.simulation_requirement || '없음' }}</div>
+                <div class="modal-label">{{ t('history.requirement') }}</div>
+                <div class="modal-requirement">{{ selectedProject.simulation_requirement || '-' }}</div>
               </div>
 
               <!-- 文件列表 -->
               <div class="modal-section">
-                <div class="modal-label">연결된 파일</div>
+                <div class="modal-label">{{ t('history.linkedFiles') }}</div>
                 <div class="modal-files" v-if="selectedProject.files && selectedProject.files.length > 0">
                   <div v-for="(file, index) in selectedProject.files" :key="index" class="modal-file-item">
                     <span class="file-tag" :class="getFileType(file.filename)">{{ getFileTypeLabel(file.filename) }}</span>
                     <span class="modal-file-name">{{ file.filename }}</span>
                   </div>
                 </div>
-                <div class="modal-empty" v-else>연결된 파일 없음</div>
+                <div class="modal-empty" v-else>{{ t('common.label.noLinkedFiles') }}</div>
               </div>
             </div>
 
             <!-- 기록 재생分割线 -->
             <div class="modal-divider">
               <span class="divider-line"></span>
-              <span class="divider-text">기록 재생</span>
+              <span class="divider-text">{{ t('history.playback') }}</span>
               <span class="divider-line"></span>
             </div>
 
@@ -159,7 +159,7 @@
               >
                 <span class="btn-step">Step1</span>
                 <span class="btn-icon">◇</span>
-                <span class="btn-text">그래프 구축</span>
+                <span class="btn-text">{{ t('history.graphBuild') }}</span>
               </button>
               <button 
                 class="modal-btn btn-simulation" 
@@ -167,7 +167,7 @@
               >
                 <span class="btn-step">Step2</span>
                 <span class="btn-icon">◈</span>
-                <span class="btn-text">환경 구성</span>
+                <span class="btn-text">{{ t('history.envSetup') }}</span>
               </button>
               <button 
                 class="modal-btn btn-report" 
@@ -176,12 +176,12 @@
               >
                 <span class="btn-step">Step4</span>
                 <span class="btn-icon">◆</span>
-                <span class="btn-text">분석 보고서</span>
+                <span class="btn-text">{{ t('history.report') }}</span>
               </button>
             </div>
             <!-- 不可回放提示 -->
             <div class="modal-playback-hint">
-              <span class="hint-text">Step3 “시뮬레이션 시작”과 Step5 “심층 상호작용”은 실행 중에만 사용할 수 있으며, 기록 재생은 지원하지 않습니다.</span>
+              <span class="hint-text">{{ t('history.playbackHint') }}</span>
             </div>
           </div>
         </div>
@@ -194,9 +194,11 @@
 import { ref, computed, onMounted, onUnmounted, onActivated, watch, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { getSimulationHistory } from '../api/simulation'
+import { useLocale } from '../i18n'
 
 const router = useRouter()
 const route = useRoute()
+const { t } = useLocale()
 
 // 状态
 const projects = ref([])
@@ -337,7 +339,7 @@ const truncateText = (text, maxLength) => {
 
 // 从시뮬레이션 요구사항生成标题（取前20字）
 const getSimulationTitle = (requirement) => {
-  if (!requirement) return '이름 없는 시뮬레이션'
+  if (!requirement) return t('common.label.unnamedSimulation')
   const title = requirement.slice(0, 20)
   return requirement.length > 20 ? title + '...' : title
 }
@@ -353,8 +355,8 @@ const formatSimulationId = (simulationId) => {
 const formatRounds = (simulation) => {
   const current = simulation.current_round || 0
   const total = simulation.total_rounds || 0
-  if (total === 0) return '시작 전'
-  return `${current}/${total} 라운드`
+  if (total === 0) return t('history.roundsBeforeStart')
+  return `${current}/${total} ${t('history.roundsSuffix')}`
 }
 
 // 获取文件类型（用于样式）
@@ -382,7 +384,7 @@ const getFileTypeLabel = (filename) => {
 
 // 截断文件名（保留扩展名）
 const truncateFilename = (filename, maxLength) => {
-  if (!filename) return '알 수 없는 파일'
+  if (!filename) return t('common.label.unknownFile')
   if (filename.length <= maxLength) return filename
   
   const ext = filename.includes('.') ? '.' + filename.split('.').pop() : ''

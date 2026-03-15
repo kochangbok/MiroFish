@@ -15,7 +15,7 @@
             :class="{ active: viewMode === mode }"
             @click="viewMode = mode"
           >
-            {{ { graph: '图谱', split: '双栏', workbench: '工作台' }[mode] }}
+            {{ modeLabels[mode] }}
           </button>
         </div>
       </div>
@@ -23,7 +23,7 @@
       <div class="header-right">
         <div class="workflow-step">
           <span class="step-num">Step 4/5</span>
-          <span class="step-name">报告生成</span>
+          <span class="step-name">{{ t('workflow.report.title') }}</span>
         </div>
         <div class="step-divider"></div>
         <span class="status-indicator" :class="statusClass">
@@ -69,9 +69,11 @@ import Step4Report from '../components/Step4Report.vue'
 import { getProject, getGraphData } from '../api/graph'
 import { getSimulation } from '../api/simulation'
 import { getReport } from '../api/report'
+import { useLocale } from '../i18n'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useLocale()
 
 // Props
 const props = defineProps({
@@ -80,6 +82,11 @@ const props = defineProps({
 
 // Layout State - 默认切换到工作台视角
 const viewMode = ref('workbench')
+const modeLabels = computed(() => ({
+  graph: t('common.view.graph'),
+  split: t('common.view.split'),
+  workbench: t('common.view.workbench')
+}))
 
 // Data State
 const currentReportId = ref(route.params.reportId)
@@ -109,9 +116,9 @@ const statusClass = computed(() => {
 })
 
 const statusText = computed(() => {
-  if (currentStatus.value === 'error') return 'Error'
-  if (currentStatus.value === 'completed') return 'Completed'
-  return 'Generating'
+  if (currentStatus.value === 'error') return t('common.status.error')
+  if (currentStatus.value === 'completed') return t('common.status.completed')
+  return t('common.status.generating')
 })
 
 // --- Helpers ---
@@ -219,7 +226,7 @@ onMounted(() => {
   flex-direction: column;
   background: #FFF;
   overflow: hidden;
-  font-family: 'Space Grotesk', 'Noto Sans SC', system-ui, sans-serif;
+  font-family: 'Space Grotesk', 'Noto Sans KR', system-ui, sans-serif;
 }
 
 /* Header */

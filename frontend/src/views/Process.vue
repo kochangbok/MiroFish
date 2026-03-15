@@ -1104,7 +1104,7 @@ onUnmounted(() => {
 .process-page {
   min-height: 100vh;
   background: var(--white);
-  font-family: 'JetBrains Mono', 'Noto Sans SC', monospace;
+  font-family: 'JetBrains Mono', 'Noto Sans KR', monospace;
   overflow: hidden; /* Prevent body scroll in fullscreen */
 }
 

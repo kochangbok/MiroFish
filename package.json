@@ -7,9 +7,13 @@
     "setup:backend": "cd backend && uv sync",
     "setup:all": "npm run setup && npm run setup:backend",
     "dev": "concurrently --kill-others -n \"backend,frontend\" -c \"green,cyan\" \"npm run backend\" \"npm run frontend\"",
+    "dev:all:raw": "concurrently --kill-others -n \"bridge,backend,frontend\" -c \"magenta,green,cyan\" \"npm run bridge\" \"npm run backend\" \"npm run frontend\"",
+    "dev:all": "bash ./scripts/dev-all.sh",
     "backend": "cd backend && uv run python run.py",
+    "bridge": "PORT=${PORT:-8787} CODEX_BRIDGE_WORKDIR=${CODEX_BRIDGE_WORKDIR:-$PWD} sh -c 'cd ../codex-bridge && npm start'",
     "frontend": "cd frontend && npm run dev",
-    "build": "cd frontend && npm run build"
+    "build": "cd frontend && npm run build",
+    "health": "node ./scripts/health-check.mjs"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

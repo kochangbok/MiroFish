@@ -123,6 +123,16 @@ curl -s http://127.0.0.1:8787/health
 
 프로젝트 루트에서:
 
+### 전체 실행(권장)
+```bash
+npm run dev:all
+```
+
+이 명령은 아래 3개를 한 번에 띄우고, 자동 헬스체크까지 수행합니다.
+- local bridge
+- backend
+- frontend
+
 ### 백엔드
 ```bash
 npm run backend
@@ -135,6 +145,15 @@ npm run frontend
 
 브라우저 접속:
 - `http://localhost:3000`
+
+수동 점검:
+```bash
+npm run health
+```
+
+> 참고: 이 저장소의 프론트엔드는 **항상 3000 포트만 사용**하도록 설정했습니다.  
+> 예전처럼 3000이 이미 점유되어 있을 때 Vite가 자동으로 3001로 올라가서 헷갈리는 상황을 막기 위해 `strictPort`를 켰습니다.  
+> 이제 3000을 못 쓰면 프론트가 명확하게 실패하므로, 다른 프로세스를 정리한 뒤 다시 실행하면 됩니다.
 
 ---
 
@@ -206,6 +225,7 @@ npm run frontend
 - 백엔드가 켜져 있는지 확인
 - `http://localhost:5001` 응답 여부 확인
 - 브라우저 콘솔에서 `ERR_CONNECTION_REFUSED`가 있으면 백엔드 미실행 가능성이 큼
+- `npm run health`로 frontend/backend/bridge를 한 번에 확인
 
 ### Zep 관련 오류가 날 때
 - `.env`의 `ZEP_API_KEY` 확인

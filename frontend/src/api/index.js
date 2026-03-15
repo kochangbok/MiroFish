@@ -43,7 +43,8 @@ service.interceptors.response.use(
     
     // 处理网络错误
     if (error.message === 'Network Error') {
-      console.error('Network error - please check your connection')
+      console.error('Network error - backend or local bridge may be unavailable')
+      error.message = 'Network Error: backend(http://localhost:5001) 또는 local bridge(http://127.0.0.1:8787)가 실행 중인지 확인하세요.'
     }
     
     return Promise.reject(error)

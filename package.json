@@ -13,7 +13,8 @@
     "bridge": "PORT=${PORT:-8787} CODEX_BRIDGE_WORKDIR=${CODEX_BRIDGE_WORKDIR:-$PWD} sh -c 'cd ../codex-bridge && npm start'",
     "frontend": "cd frontend && npm run dev",
     "build": "cd frontend && npm run build",
-    "health": "node ./scripts/health-check.mjs"
+    "health": "node ./scripts/health-check.mjs",
+    "stop:all": "bash ./scripts/stop-all.sh"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"

@@ -310,7 +310,7 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['go-back', 'next-step', 'add-log', 'update-status'])
-const { t, rt } = useLocale()
+const { t, rt, locale } = useLocale()
 
 const router = useRouter()
 

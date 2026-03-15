@@ -23,6 +23,16 @@ from ..utils.zep_paging import fetch_all_nodes, fetch_all_edges
 logger = get_logger('mirofish.zep_tools')
 
 
+def _truncate_search_query(query: str, max_chars: int = 380) -> str:
+    """Trim overly long Zep search queries to stay below the API limit."""
+    if not query:
+        return query
+    query = query.strip()
+    if len(query) <= max_chars:
+        return query
+    return query[:max_chars].rsplit(' ', 1)[0].strip() or query[:max_chars]
+
+
 @dataclass
 class SearchResult:
     """搜索结果"""
@@ -429,7 +439,7 @@ class ZepToolsService:
         self.client = Zep(api_key=self.api_key)
         # LLM客户端用于InsightForge生成子问题
         self._llm_client = llm_client
-        logger.info("ZepToolsService 初始化完成")
+        logger.info("ZepToolsService initialized")
     
     @property
     def llm(self) -> LLMClient:
@@ -439,7 +449,7 @@ class ZepToolsService:
         return self._llm_client
     
     def _call_with_retry(self, func, operation_name: str, max_retries: int = None):
-        """带重试机制的API调用"""
+        """API call with retries."""
         max_retries = max_retries or self.MAX_RETRIES
         last_exception = None
         delay = self.RETRY_DELAY
@@ -451,13 +461,13 @@ class ZepToolsService:
                 last_exception = e
                 if attempt < max_retries - 1:
                     logger.warning(
-                        f"Zep {operation_name} 第 {attempt + 1} 次尝试失败: {str(e)[:100]}, "
-                        f"{delay:.1f}秒后重试..."
+                        f"Zep {operation_name} attempt {attempt + 1} failed: {str(e)[:100]}, "
+                        f"retrying in {delay:.1f}s..."
                     )
                     time.sleep(delay)
                     delay *= 2
                 else:
-                    logger.error(f"Zep {operation_name} 在 {max_retries} 次尝试后仍失败: {str(e)}")
+                    logger.error(f"Zep {operation_name} still failed after {max_retries} attempts: {str(e)}")
         
         raise last_exception
     
@@ -483,7 +493,14 @@ class ZepToolsService:
         Returns:
             SearchResult: 搜索结果
         """
-        logger.info(f"图谱搜索: graph_id={graph_id}, query={query[:50]}...")
+        original_query = query
+        query = _truncate_search_query(query)
+        if query != original_query:
+            logger.info(
+                f"Search query truncated for Zep: {len(original_query)} -> {len(query)} chars"
+            )
+
+        logger.info(f"Graph search: graph_id={graph_id}, query={query[:50]}...")
         
         # 尝试使用Zep Cloud Search API
         try:
@@ -495,7 +512,7 @@ class ZepToolsService:
                     scope=scope,
                     reranker="cross_encoder"
                 ),
-                operation_name=f"图谱搜索(graph={graph_id})"
+                operation_name=f"graph search(graph={graph_id})"
             )
             
             facts = []
@@ -528,7 +545,7 @@ class ZepToolsService:
                     if hasattr(node, 'summary') and node.summary:
                         facts.append(f"[{node.name}]: {node.summary}")
             
-            logger.info(f"搜索完成: 找到 {len(facts)} 条相关事实")
+            logger.info(f"Search complete: found {len(facts)} related facts")
             
             return SearchResult(
                 facts=facts,
@@ -539,9 +556,9 @@ class ZepToolsService:
             )
             
         except Exception as e:
-            logger.warning(f"Zep Search API失败，降级为本地搜索: {str(e)}")
+            logger.warning(f"Zep Search API failed; falling back to local search: {str(e)}")
             # 降级：使用本地关键词匹配搜索
-            return self._local_search(graph_id, query, limit, scope)
+            return self._local_search(graph_id, original_query, limit, scope)
     
     def _local_search(
         self, 
@@ -564,7 +581,7 @@ class ZepToolsService:
         Returns:
             SearchResult: 搜索结果
         """
-        logger.info(f"使用本地搜索: query={query[:30]}...")
+        logger.info(f"Using local search: query={query[:30]}...")
         
         facts = []
         edges_result = []
@@ -634,10 +651,10 @@ class ZepToolsService:
                     if node.summary:
                         facts.append(f"[{node.name}]: {node.summary}")
             
-            logger.info(f"本地搜索完成: 找到 {len(facts)} 条相关事实")
+            logger.info(f"Local search complete: found {len(facts)} related facts")
             
         except Exception as e:
-            logger.error(f"本地搜索失败: {str(e)}")
+            logger.error(f"Local search failed: {str(e)}")
         
         return SearchResult(
             facts=facts,
@@ -657,7 +674,7 @@ class ZepToolsService:
         Returns:
             节点列表
         """
-        logger.info(f"获取图谱 {graph_id} 的所有节点...")
+        logger.info(f"Fetching all nodes for graph {graph_id}...")
 
         nodes = fetch_all_nodes(self.client, graph_id)
 
@@ -672,7 +689,7 @@ class ZepToolsService:
                 attributes=node.attributes or {}
             ))
 
-        logger.info(f"获取到 {len(result)} 个节点")
+        logger.info(f"Fetched {len(result)} nodes")
         return result
 
     def get_all_edges(self, graph_id: str, include_temporal: bool = True) -> List[EdgeInfo]:
@@ -686,7 +703,7 @@ class ZepToolsService:
         Returns:
             边列表（包含created_at, valid_at, invalid_at, expired_at）
         """
-        logger.info(f"获取图谱 {graph_id} 的所有边...")
+        logger.info(f"Fetching all edges for graph {graph_id}...")
 
         edges = fetch_all_edges(self.client, graph_id)
 
@@ -710,7 +727,7 @@ class ZepToolsService:
 
             result.append(edge_info)
 
-        logger.info(f"获取到 {len(result)} 条边")
+        logger.info(f"Fetched {len(result)} edges")
         return result
     
     def get_node_detail(self, node_uuid: str) -> Optional[NodeInfo]:
@@ -862,7 +879,7 @@ class ZepToolsService:
         Returns:
             统计信息
         """
-        logger.info(f"获取图谱 {graph_id} 的统计信息...")
+        logger.info(f"Fetching statistics for graph {graph_id}...")
         
         nodes = self.get_all_nodes(graph_id)
         edges = self.get_all_edges(graph_id)
@@ -906,7 +923,7 @@ class ZepToolsService:
         Returns:
             模拟上下文信息
         """
-        logger.info(f"获取模拟上下文: {simulation_requirement[:50]}...")
+        logger.info(f"Fetching simulation context: {simulation_requirement[:50]}...")
         
         # 搜索与模拟需求相关的信息
         search_result = self.search_graph(

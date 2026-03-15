@@ -11,8 +11,8 @@
               <span class="report-tag">{{ t('step4.reportTag') }}</span>
               <span class="report-id">ID: {{ reportId || 'REF-2024-X92' }}</span>
             </div>
-            <h1 class="main-title">{{ reportOutline.title }}</h1>
-            <p class="sub-title">{{ reportOutline.summary }}</p>
+            <h1 class="main-title">{{ rt(reportOutline.title) }}</h1>
+            <p class="sub-title">{{ rt(reportOutline.summary) }}</p>
             <div class="header-divider"></div>
           </div>
 
@@ -30,7 +30,7 @@
             >
               <div class="section-header-row" @click="toggleSectionCollapse(idx)" :class="{ 'clickable': isSectionCompleted(idx + 1) }">
                 <span class="section-number">{{ String(idx + 1).padStart(2, '0') }}</span>
-                <h3 class="section-title">{{ section.title }}</h3>
+                <h3 class="section-title">{{ rt(section.title) }}</h3>
                 <svg 
                   v-if="isSectionCompleted(idx + 1)" 
                   class="collapse-icon" 
@@ -58,7 +58,7 @@
                       <path d="M12 2a10 10 0 0 1 10 10" stroke-width="4" stroke="#4B5563" stroke-linecap="round"></path>
                     </svg>
                   </div>
-                  <span class="loading-text">{{ t('step4.generatingSection', { title: section.title }) }}</span>
+                  <span class="loading-text">{{ t('step4.generatingSection', { title: rt(section.title) }) }}</span>
                 </div>
               </div>
             </div>
@@ -177,10 +177,10 @@
 
                   <!-- Planning -->
                   <template v-if="log.action === 'planning_start'">
-                    <div class="status-message planning">{{ log.details?.message }}</div>
+                    <div class="status-message planning">{{ rt(log.details?.message) }}</div>
                   </template>
                   <template v-if="log.action === 'planning_complete'">
-                    <div class="status-message success">{{ log.details?.message }}</div>
+                    <div class="status-message success">{{ rt(log.details?.message) }}</div>
                     <div class="outline-badge" v-if="log.details?.outline">
                       {{ t('step4.sectionsPlanned', { count: log.details.outline.sections?.length || 0 }) }}
                     </div>
@@ -190,7 +190,7 @@
                   <template v-if="log.action === 'section_start'">
                     <div class="section-tag">
                       <span class="tag-num">#{{ log.section_index }}</span>
-                      <span class="tag-title">{{ log.section_title }}</span>
+                      <span class="tag-title">{{ rt(log.section_title) }}</span>
                     </div>
                   </template>
                   
@@ -201,7 +201,7 @@
                         <path d="M12 20h9"></path>
                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                       </svg>
-                      <span class="tag-title">{{ log.section_title }}</span>
+                      <span class="tag-title">{{ rt(log.section_title) }}</span>
                     </div>
                   </template>
 
@@ -211,7 +211,7 @@
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
-                      <span class="tag-title">{{ log.section_title }}</span>
+                      <span class="tag-title">{{ rt(log.section_title) }}</span>
                     </div>
                   </template>
 
@@ -320,7 +320,7 @@
                       <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="20 6 9 17 4 12"></polyline>
                       </svg>
-                      <span>{{ t('step4.sectionGenerated', { title: log.section_title }) }}</span>
+                      <span>{{ t('step4.sectionGenerated', { title: rt(log.section_title) }) }}</span>
                     </div>
                     <div v-if="expandedLogs.has(log.timestamp) && log.details?.response" class="llm-content">
                       <pre>{{ log.details.response }}</pre>
@@ -1821,7 +1821,7 @@ const workflowSteps = computed(() => {
     steps.push({
       key: `section-${idx}`,
       noLabel: String(idx).padStart(2, '0'),
-      title: section.title,
+      title: rt(section.title),
       status,
       meta: status === 'active' ? 'IN PROGRESS' : ''
     })
@@ -1832,7 +1832,7 @@ const workflowSteps = computed(() => {
   steps.push({
     key: 'complete',
     noLabel: 'OK',
-    title: 'Complete',
+    title: t('step4.reportComplete'),
     status: completeStatus,
     meta: completeStatus === 'active' ? 'FINALIZING' : ''
   })

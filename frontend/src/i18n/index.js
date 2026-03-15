@@ -788,6 +788,16 @@ function prefixRule(prefix, koPrefix, enPrefix) {
 }
 
 const runtimeExact = {
+  '未来预测报告': { ko: '미래 예측 보고서', en: 'Future Forecast Report' },
+  '基于模拟预测的未来趋势与风险分析': { ko: '시뮬레이션 기반 미래 추세 및 리스크 분석', en: 'Future trend and risk analysis based on simulation forecasts' },
+  '预测场景与核心发现': { ko: '예측 시나리오와 핵심 발견', en: 'Predicted Scenario & Key Findings' },
+  '人群行为预测分析': { ko: '집단 행동 예측 분석', en: 'Behavioral Forecast by Group' },
+  '趋势展望与风险提示': { ko: '추세 전망과 리스크 시사점', en: 'Trend Outlook & Risk Signals' },
+  '报告生成任务开始': { ko: '보고서 생성 작업 시작', en: 'Report generation task started' },
+  '开始规划报告大纲': { ko: '보고서 개요 계획 시작', en: 'Starting report outline planning' },
+  '获取模拟上下文信息': { ko: '시뮬레이션 컨텍스트 정보 조회', en: 'Fetching simulation context' },
+  '大纲规划完成': { ko: '개요 계획 완료', en: 'Outline planning complete' },
+  '报告生成完成': { ko: '보고서 생성 완료', en: 'Report generation complete' },
   '正在分析文档...': { ko: '문서를 분석하는 중...', en: 'Analyzing documents...' },
   '错误：缺少 simulationId': { ko: '오류: simulationId가 없습니다', en: 'Error: missing simulationId' },
   'Project view initialized.': { ko: '프로젝트 화면을 초기화했습니다.', en: 'Project view initialized.' },
@@ -844,6 +854,106 @@ const runtimeExact = {
 }
 
 const runtimeRules = [
+  {
+    regex: /^开始规划报告大纲\.\.\.$/,
+    ko: () => '보고서 개요 계획 시작...',
+    en: () => 'Starting report outline planning...'
+  },
+  {
+    regex: /^大纲规划失败: (.+)$/,
+    ko: ([, detail]) => `개요 계획 실패: ${detail}`,
+    en: ([, detail]) => `Outline planning failed: ${detail}`
+  },
+  {
+    regex: /^大纲已保存: (.+)$/,
+    ko: ([, id]) => `개요가 저장되었습니다: ${id}`,
+    en: ([, id]) => `Outline saved: ${id}`
+  },
+  {
+    regex: /^大纲已保存到文件: (.+)$/,
+    ko: ([, path]) => `개요가 파일로 저장되었습니다: ${path}`,
+    en: ([, path]) => `Outline saved to file: ${path}`
+  },
+  {
+    regex: /^ReACT生成章节: (.+)$/,
+    ko: ([, title]) => `ReACT로 섹션 생성: ${rt(title)}`,
+    en: ([, title]) => `Generating section with ReACT: ${rt(title)}`
+  },
+  {
+    regex: /^报告生成失败: (.+)$/,
+    ko: ([, detail]) => `보고서 생성 실패: ${detail}`,
+    en: ([, detail]) => `Report generation failed: ${detail}`
+  },
+  {
+    regex: /^报告已保存: (.+)$/,
+    ko: ([, id]) => `보고서가 저장되었습니다: ${id}`,
+    en: ([, id]) => `Report saved: ${id}`
+  },
+  {
+    regex: /^获取模拟上下文: (.+)\.\.\.$/,
+    ko: ([, text]) => `시뮬레이션 컨텍스트 조회: ${text}...`,
+    en: ([, text]) => `Fetching simulation context: ${text}...`
+  },
+  {
+    regex: /^图谱搜索: graph_id=(.+), query=(.+)\.\.\.$/,
+    ko: ([, graphId, query]) => `그래프 검색: graph_id=${graphId}, query=${query}...`,
+    en: ([, graphId, query]) => `Graph search: graph_id=${graphId}, query=${query}...`
+  },
+  {
+    regex: /^Zep 图谱搜索\(graph=(.+)\) 第 (\d+) 次尝试失败: (.+), ([0-9.]+)秒后重试\.\.\.$/,
+    ko: ([, graphId, attempt, detail, delay]) => `Zep 그래프 검색(graph=${graphId}) ${attempt}차 시도 실패: ${detail}, ${delay}초 후 재시도...`,
+    en: ([, graphId, attempt, detail, delay]) => `Zep graph search(graph=${graphId}) attempt ${attempt} failed: ${detail}, retrying in ${delay}s...`
+  },
+  {
+    regex: /^Zep 图谱搜索\(graph=(.+)\) 在 (\d+) 次尝试后仍失败: (.+)$/,
+    ko: ([, graphId, tries, detail]) => `Zep 그래프 검색(graph=${graphId})이 ${tries}회 시도 후에도 실패했습니다: ${detail}`,
+    en: ([, graphId, tries, detail]) => `Zep graph search(graph=${graphId}) still failed after ${tries} attempts: ${detail}`
+  },
+  {
+    regex: /^Zep Search API失败，降级为本地搜索: (.+)$/,
+    ko: ([, detail]) => `Zep Search API 실패, 로컬 검색으로 폴백합니다: ${detail}`,
+    en: ([, detail]) => `Zep Search API failed; falling back to local search: ${detail}`
+  },
+  {
+    regex: /^使用本地搜索: query=(.+)\.\.\.$/,
+    ko: ([, query]) => `로컬 검색 사용: query=${query}...`,
+    en: ([, query]) => `Using local search: query=${query}...`
+  },
+  {
+    regex: /^获取图谱 (.+) 的所有边\.\.\.$/,
+    ko: ([, graphId]) => `그래프 ${graphId}의 전체 엣지를 가져오는 중...`,
+    en: ([, graphId]) => `Fetching all edges for graph ${graphId}...`
+  },
+  {
+    regex: /^获取到 (\d+) 条边$/,
+    ko: ([, count]) => `${count}개의 엣지를 가져왔습니다`,
+    en: ([, count]) => `Fetched ${count} edges`
+  },
+  {
+    regex: /^本地搜索完成: 找到 (\d+) 条相关事实$/,
+    ko: ([, count]) => `로컬 검색 완료: 관련 사실 ${count}개를 찾았습니다`,
+    en: ([, count]) => `Local search complete: found ${count} related facts`
+  },
+  {
+    regex: /^获取图谱 (.+) 的统计信息\.\.\.$/,
+    ko: ([, graphId]) => `그래프 ${graphId}의 통계 정보를 가져오는 중...`,
+    en: ([, graphId]) => `Fetching statistics for graph ${graphId}...`
+  },
+  {
+    regex: /^获取图谱 (.+) 的所有节点\.\.\.$/,
+    ko: ([, graphId]) => `그래프 ${graphId}의 전체 노드를 가져오는 중...`,
+    en: ([, graphId]) => `Fetching all nodes for graph ${graphId}...`
+  },
+  {
+    regex: /^获取到 (\d+) 个节点$/,
+    ko: ([, count]) => `${count}개의 노드를 가져왔습니다`,
+    en: ([, count]) => `Fetched ${count} nodes`
+  },
+  {
+    regex: /^大纲规划完成，共(\d+)个章节$/,
+    ko: ([, count]) => `개요 계획 완료, 총 ${count}개 섹션`,
+    en: ([, count]) => `Outline planning complete, ${count} sections`
+  },
   {
     regex: /^进入 Step (\d+): (.+)$/,
     ko: ([, n, name]) => `Step ${n} 진입: ${stepNameForLocale(name, 'ko')}`,
@@ -971,6 +1081,14 @@ export function t(path, params = {}) {
 export function rt(text) {
   if (text === null || text === undefined) return text
   const raw = String(text)
+
+  const consoleMatch = raw.match(/^(\[[^\]]+\]\s+(?:INFO|WARNING|ERROR):\s+)(.*)$/)
+  if (consoleMatch) {
+    const [, prefix, body] = consoleMatch
+    const translatedBody = rt(body)
+    return prefix + translatedBody
+  }
+
   const exact = runtimeExact[raw]
   if (exact) return exact[locale.value]
 

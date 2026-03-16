@@ -1,7 +1,7 @@
 <template>
   <div class="workbench-panel">
     <div class="scroll-container">
-      <!-- Step 01: Ontology -->
+
       <div class="step-card" :class="{ 'active': currentPhase === 0, 'completed': currentPhase > 0 }">
         <div class="card-header">
           <div class="step-info">
@@ -14,20 +14,20 @@
             <span v-else class="badge pending">{{ t('step1.waiting') }}</span>
           </div>
         </div>
-        
+
         <div class="card-content">
           <p class="api-note">POST /api/graph/ontology/generate</p>
           <p class="description">
             {{ t('step1.ontologyDesc') }}
           </p>
 
-          <!-- Loading / Progress -->
+
           <div v-if="currentPhase === 0 && ontologyProgress" class="progress-section">
             <div class="spinner-sm"></div>
             <span>{{ rt(ontologyProgress.message || t('step1.analyzing')) }}</span>
           </div>
 
-          <!-- Detail Overlay -->
+
           <div v-if="selectedOntologyItem" class="ontology-detail-overlay">
             <div class="detail-header">
                <div class="detail-title-group">
@@ -38,8 +38,8 @@
             </div>
             <div class="detail-body">
                <div class="detail-desc">{{ selectedOntologyItem.description }}</div>
-               
-               <!-- Attributes -->
+
+
                <div class="detail-section" v-if="selectedOntologyItem.attributes?.length">
                   <span class="section-label">ATTRIBUTES</span>
                   <div class="attr-list">
@@ -51,7 +51,7 @@
                   </div>
                </div>
 
-               <!-- Examples (Entity) -->
+
                <div class="detail-section" v-if="selectedOntologyItem.examples?.length">
                   <span class="section-label">EXAMPLES</span>
                   <div class="example-list">
@@ -59,7 +59,7 @@
                   </div>
                </div>
 
-               <!-- Source/Target (Relation) -->
+
                <div class="detail-section" v-if="selectedOntologyItem.source_targets?.length">
                   <span class="section-label">CONNECTIONS</span>
                   <div class="conn-list">
@@ -73,13 +73,13 @@
             </div>
           </div>
 
-          <!-- Generated Entity Tags -->
+
           <div v-if="projectData?.ontology?.entity_types" class="tags-container" :class="{ 'dimmed': selectedOntologyItem }">
             <span class="tag-label">GENERATED ENTITY TYPES</span>
             <div class="tags-list">
-              <span 
-                v-for="entity in projectData.ontology.entity_types" 
-                :key="entity.name" 
+              <span
+                v-for="entity in projectData.ontology.entity_types"
+                :key="entity.name"
                 class="entity-tag clickable"
                 @click="selectOntologyItem(entity, 'entity')"
               >
@@ -88,13 +88,13 @@
             </div>
           </div>
 
-          <!-- Generated Relation Tags -->
+
           <div v-if="projectData?.ontology?.edge_types" class="tags-container" :class="{ 'dimmed': selectedOntologyItem }">
             <span class="tag-label">GENERATED RELATION TYPES</span>
             <div class="tags-list">
-              <span 
-                v-for="rel in projectData.ontology.edge_types" 
-                :key="rel.name" 
+              <span
+                v-for="rel in projectData.ontology.edge_types"
+                :key="rel.name"
                 class="entity-tag clickable"
                 @click="selectOntologyItem(rel, 'relation')"
               >
@@ -105,7 +105,7 @@
         </div>
       </div>
 
-      <!-- Step 02: Graph Build -->
+
       <div class="step-card" :class="{ 'active': currentPhase === 1, 'completed': currentPhase > 1 }">
         <div class="card-header">
           <div class="step-info">
@@ -124,8 +124,8 @@
           <p class="description">
             {{ t('step1.graphDesc') }}
           </p>
-          
-          <!-- Stats Cards -->
+
+
           <div class="stats-grid">
             <div class="stat-card">
               <span class="stat-value">{{ graphStats.nodes }}</span>
@@ -143,7 +143,7 @@
         </div>
       </div>
 
-      <!-- Step 03: Complete -->
+
       <div class="step-card" :class="{ 'active': currentPhase === 2, 'completed': currentPhase >= 2 }">
         <div class="card-header">
           <div class="step-info">
@@ -154,12 +154,12 @@
             <span v-if="currentPhase >= 2" class="badge accent">{{ t('step1.inProgress') }}</span>
           </div>
         </div>
-        
+
         <div class="card-content">
           <p class="api-note">POST /api/simulation/create</p>
           <p class="description">{{ t('step1.completeDesc') }}</p>
-          <button 
-            class="action-btn" 
+          <button
+            class="action-btn"
             :disabled="currentPhase < 2 || creatingSimulation"
             @click="handleEnterEnvSetup"
           >
@@ -170,7 +170,7 @@
       </div>
     </div>
 
-    <!-- Bottom Info / Logs -->
+
     <div class="system-logs">
       <div class="log-header">
         <span class="log-title">{{ t('common.label.systemDashboard') }}</span>
@@ -210,15 +210,15 @@ const selectedOntologyItem = ref(null)
 const logContent = ref(null)
 const creatingSimulation = ref(false)
 
-// 进入环境搭建 - 创建 simulation 并跳转
+// 환경 구축 시작 - 시뮬레이션 생성 및 점프
 const handleEnterEnvSetup = async () => {
   if (!props.projectData?.project_id || !props.projectData?.graph_id) {
     console.error(t('step1.missingProject'))
     return
   }
-  
+
   creatingSimulation.value = true
-  
+
   try {
     const res = await createSimulation({
       project_id: props.projectData.project_id,
@@ -226,19 +226,19 @@ const handleEnterEnvSetup = async () => {
       enable_twitter: true,
       enable_reddit: true
     })
-    
+
     if (res.success && res.data?.simulation_id) {
-      // 跳转到 simulation 页面
+      // 시뮬레이션 페이지로 이동
       router.push({
         name: 'Simulation',
         params: { simulationId: res.data.simulation_id }
       })
     } else {
-      console.error('创建模拟失败:', res.error)
+      console.error('시뮬레이션을 생성하지 못했습니다.:', res.error)
       alert(`${t('step1.createFailed')}: ${res.error || t('common.status.error')}`)
     }
   } catch (err) {
-    console.error('创建模拟异常:', err)
+    console.error('모의 예외 생성:', err)
     alert(`${t('step1.createError')}: ${err.message}`)
   } finally {
     creatingSimulation.value = false

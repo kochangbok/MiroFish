@@ -1,26 +1,26 @@
 <template>
-  <div 
+  <div
     class="history-database"
     :class="{ 'no-projects': projects.length === 0 && !loading }"
     ref="historyContainer"
   >
-    <!-- 背景装饰：技术网格线（只在有项目时显示） -->
+
     <div v-if="projects.length > 0 || loading" class="tech-grid-bg">
       <div class="grid-pattern"></div>
       <div class="gradient-overlay"></div>
     </div>
 
-    <!-- 标题区域 -->
+
     <div class="section-header">
       <div class="section-line"></div>
       <span class="section-title">{{ t('history.title') }}</span>
       <div class="section-line"></div>
     </div>
 
-    <!-- 卡片容器（只在有项目时显示） -->
+
     <div v-if="projects.length > 0" class="cards-container" :class="{ expanded: isExpanded }" :style="containerStyle">
-      <div 
-        v-for="(project, index) in projects" 
+      <div
+        v-for="(project, index) in projects"
         :key="project.simulation_id"
         class="project-card"
         :class="{ expanded: isExpanded, hovering: hoveringCard === index }"
@@ -29,61 +29,60 @@
         @mouseleave="hoveringCard = null"
         @click="navigateToProject(project)"
       >
-        <!-- 卡片头部：simulation_id 和 功能可用状态 -->
+
         <div class="card-header">
           <span class="card-id">{{ formatSimulationId(project.simulation_id) }}</span>
           <div class="card-status-icons">
-            <span 
-              class="status-icon" 
+            <span
+              class="status-icon"
               :class="{ available: project.project_id, unavailable: !project.project_id }"
               :title="t('history.graphBuild')"
             >◇</span>
-            <span 
-              class="status-icon available" 
+            <span
+              class="status-icon available"
               :title="t('history.envSetup')"
             >◈</span>
-            <span 
-              class="status-icon" 
+            <span
+              class="status-icon"
               :class="{ available: project.report_id, unavailable: !project.report_id }"
               :title="t('history.report')"
             >◆</span>
           </div>
         </div>
 
-        <!-- 文件列表区域 -->
+
         <div class="card-files-wrapper">
-          <!-- 角落装饰 - 取景框风格 -->
+
           <div class="corner-mark top-left-only"></div>
-          
-          <!-- 文件列表 -->
+
+
           <div class="files-list" v-if="project.files && project.files.length > 0">
-            <div 
-              v-for="(file, fileIndex) in project.files.slice(0, 3)" 
+            <div
+              v-for="(file, fileIndex) in project.files.slice(0, 3)"
               :key="fileIndex"
               class="file-item"
             >
               <span class="file-tag" :class="getFileType(file.filename)">{{ getFileTypeLabel(file.filename) }}</span>
               <span class="file-name">{{ truncateFilename(file.filename, 20) }}</span>
             </div>
-            <!-- 如果有更多文件，显示提示 -->
             <div v-if="project.files.length > 3" class="files-more">
               +{{ project.files.length - 3 }} {{ t('history.filesSuffix') }}
             </div>
           </div>
-          <!-- 无文件时的占位 -->
+
           <div class="files-empty" v-else>
             <span class="empty-file-icon">◇</span>
             <span class="empty-file-text">{{ t('common.label.noFile') }}</span>
           </div>
         </div>
 
-        <!-- 卡片标题（使用시뮬레이션 요구사항的前20字作为标题） -->
+
         <h3 class="card-title">{{ getSimulationTitle(project.simulation_requirement) }}</h3>
 
-        <!-- 卡片描述（시뮬레이션 요구사항完整展示） -->
+
         <p class="card-desc">{{ truncateText(project.simulation_requirement, 55) }}</p>
 
-        <!-- 卡片底部 -->
+
         <div class="card-footer">
           <div class="card-datetime">
             <span class="card-date">{{ formatDate(project.created_at) }}</span>
@@ -93,24 +92,24 @@
             <span class="status-dot">●</span> {{ formatRounds(project) }}
           </span>
         </div>
-        
-        <!-- 底部装饰线 (hover时展开) -->
+
+
         <div class="card-bottom-line"></div>
       </div>
     </div>
 
-    <!-- 加载状态 -->
+
     <div v-if="loading" class="loading-state">
       <span class="loading-spinner"></span>
       <span class="loading-text">{{ t('history.loading') }}</span>
     </div>
 
-    <!-- 历史回放详情弹窗 -->
+
     <Teleport to="body">
       <Transition name="modal">
         <div v-if="selectedProject" class="modal-overlay" @click.self="closeModal">
           <div class="modal-content">
-            <!-- 弹窗头部 -->
+
             <div class="modal-header">
               <div class="modal-title-section">
                 <span class="modal-id">{{ formatSimulationId(selectedProject.simulation_id) }}</span>
@@ -122,15 +121,15 @@
               <button class="modal-close" @click="closeModal">×</button>
             </div>
 
-            <!-- 弹窗内容 -->
+
             <div class="modal-body">
-              <!-- 시뮬레이션 요구사항 -->
+
               <div class="modal-section">
                 <div class="modal-label">{{ t('history.requirement') }}</div>
                 <div class="modal-requirement">{{ selectedProject.simulation_requirement || '-' }}</div>
               </div>
 
-              <!-- 文件列表 -->
+
               <div class="modal-section">
                 <div class="modal-label">{{ t('history.linkedFiles') }}</div>
                 <div class="modal-files" v-if="selectedProject.files && selectedProject.files.length > 0">
@@ -143,17 +142,17 @@
               </div>
             </div>
 
-            <!-- 기록 재생分割线 -->
+
             <div class="modal-divider">
               <span class="divider-line"></span>
               <span class="divider-text">{{ t('history.playback') }}</span>
               <span class="divider-line"></span>
             </div>
 
-            <!-- 导航按钮 -->
+
             <div class="modal-actions">
-              <button 
-                class="modal-btn btn-project" 
+              <button
+                class="modal-btn btn-project"
                 @click="goToProject"
                 :disabled="!selectedProject.project_id"
               >
@@ -161,16 +160,16 @@
                 <span class="btn-icon">◇</span>
                 <span class="btn-text">{{ t('history.graphBuild') }}</span>
               </button>
-              <button 
-                class="modal-btn btn-simulation" 
+              <button
+                class="modal-btn btn-simulation"
                 @click="goToSimulation"
               >
                 <span class="btn-step">Step2</span>
                 <span class="btn-icon">◈</span>
                 <span class="btn-text">{{ t('history.envSetup') }}</span>
               </button>
-              <button 
-                class="modal-btn btn-report" 
+              <button
+                class="modal-btn btn-report"
                 @click="goToReport"
                 :disabled="!selectedProject.report_id"
               >
@@ -179,7 +178,7 @@
                 <span class="btn-text">{{ t('history.report') }}</span>
               </button>
             </div>
-            <!-- 不可回放提示 -->
+
             <div class="modal-playback-hint">
               <span class="hint-text">{{ t('history.playbackHint') }}</span>
             </div>
@@ -200,66 +199,66 @@ const router = useRouter()
 const route = useRoute()
 const { t } = useLocale()
 
-// 状态
+// 상태
 const projects = ref([])
 const loading = ref(true)
 const isExpanded = ref(false)
 const hoveringCard = ref(null)
 const historyContainer = ref(null)
-const selectedProject = ref(null)  // 当前选中的项目（用于弹窗）
+const selectedProject = ref(null)  // 현재 선택된 항목(팝업 창용)
 let observer = null
-let isAnimating = false  // 动画锁，防止闪烁
-let expandDebounceTimer = null  // 防抖定时器
-let pendingState = null  // 记录待执行的目标状态
+let isAnimating = false  // 깜박임 방지를 위한 애니메이션 잠금
+let expandDebounceTimer = null  // 흔들림 방지 타이머
+let pendingState = null  // 실행될 대상 상태를 기록합니다.
 
-// 卡片布局配置 - 调整为更宽的比例
+// 카드 레이아웃 구성 - 더 넓은 비율로 조정됨
 const CARDS_PER_ROW = 4
-const CARD_WIDTH = 280  
-const CARD_HEIGHT = 280 
+const CARD_WIDTH = 280
+const CARD_HEIGHT = 280
 const CARD_GAP = 24
 
-// 动态计算容器高度样式
+// 컨테이너 높이 스타일을 동적으로 계산합니다.
 const containerStyle = computed(() => {
   if (!isExpanded.value) {
-    // 折叠态：固定高度
+    // 접힌 상태: 고정 높이
     return { minHeight: '420px' }
   }
-  
-  // 展开态：根据卡片数量动态计算高度
+
+  // 확장된 상태: 카드 수에 따라 높이를 동적으로 계산합니다.
   const total = projects.value.length
   if (total === 0) {
     return { minHeight: '280px' }
   }
-  
+
   const rows = Math.ceil(total / CARDS_PER_ROW)
-  // 计算实际需要的高度：行数 * 卡片高度 + (行数-1) * 间距 + 少量底部间距
+  // 실제 필요한 높이 계산: 행 수 * 카드 높이 + (줄 수 - 1) * 간격 + 바닥 간격이 적음
   const expandedHeight = rows * CARD_HEIGHT + (rows - 1) * CARD_GAP + 10
-  
+
   return { minHeight: `${expandedHeight}px` }
 })
 
-// 获取卡片样式
+// 카드 스타일 가져오기
 const getCardStyle = (index) => {
   const total = projects.value.length
-  
+
   if (isExpanded.value) {
-    // 展开态：网格布局
+    // 확장된 상태: 그리드 레이아웃
     const transition = 'transform 700ms cubic-bezier(0.23, 1, 0.32, 1), opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease, border-color 0.3s ease'
 
     const col = index % CARDS_PER_ROW
     const row = Math.floor(index / CARDS_PER_ROW)
-    
-    // 计算当前行的卡片数量，确保每行居中
+
+    // 각 행이 중앙에 오도록 현재 행의 카드 수를 계산합니다.
     const currentRowStart = row * CARDS_PER_ROW
     const currentRowCards = Math.min(CARDS_PER_ROW, total - currentRowStart)
-    
+
     const rowWidth = currentRowCards * CARD_WIDTH + (currentRowCards - 1) * CARD_GAP
-    
+
     const startX = -(rowWidth / 2) + (CARD_WIDTH / 2)
     const colInRow = index % CARDS_PER_ROW
     const x = startX + colInRow * (CARD_WIDTH + CARD_GAP)
-    
-    // 向下展开，增加与标题的间距
+
+    // 제목과 제목 사이의 공간을 늘리려면 아래쪽으로 확장하세요.
     const y = 20 + row * (CARD_HEIGHT + CARD_GAP)
 
     return {
@@ -269,18 +268,18 @@ const getCardStyle = (index) => {
       transition: transition
     }
   } else {
-    // 折叠态：扇形堆叠
+    // 접힌 상태: 부채꼴 스태킹
     const transition = 'transform 700ms cubic-bezier(0.23, 1, 0.32, 1), opacity 700ms cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.3s ease, border-color 0.3s ease'
 
     const centerIndex = (total - 1) / 2
     const offset = index - centerIndex
-    
+
     const x = offset * 35
-    // 调整起始位置，靠近标题但保持适当间距
+    // 제목에 가깝도록 시작 위치를 조정하되 적절한 간격을 유지하세요.
     const y = 25 + Math.abs(offset) * 8
     const r = offset * 3
     const s = 0.95 - Math.abs(offset) * 0.05
-    
+
     return {
       transform: `translate(${x}px, ${y}px) rotate(${r}deg) scale(${s})`,
       zIndex: 10 + index,
@@ -290,24 +289,24 @@ const getCardStyle = (index) => {
   }
 }
 
-// 根据轮数进度获取样式类
+// 라운드 진행 상황에 따라 스타일 클래스 받기
 const getProgressClass = (simulation) => {
   const current = simulation.current_round || 0
   const total = simulation.total_rounds || 0
-  
+
   if (total === 0 || current === 0) {
-    // 未开始
+    // 시작되지 않음
     return 'not-started'
   } else if (current >= total) {
-    // 已完成
+    // 완전한
     return 'completed'
   } else {
-    // 进行中
+    // 진행 중
     return 'in-progress'
   }
 }
 
-// 格式化日期（只显示日期部分）
+// 날짜 형식 지정(날짜 부분만 표시)
 const formatDate = (dateStr) => {
   if (!dateStr) return ''
   try {
@@ -318,7 +317,7 @@ const formatDate = (dateStr) => {
   }
 }
 
-// 格式化时间（显示时:分）
+// 포맷 시간(표시된 경우:가리키다)
 const formatTime = (dateStr) => {
   if (!dateStr) return ''
   try {
@@ -331,27 +330,27 @@ const formatTime = (dateStr) => {
   }
 }
 
-// 截断文本
+// 텍스트 자르기
 const truncateText = (text, maxLength) => {
   if (!text) return ''
   return text.length > maxLength ? text.slice(0, maxLength) + '...' : text
 }
 
-// 从시뮬레이션 요구사항生成标题（取前20字）
+// ~에서시뮬레이션 요구사항제목 생성(처음 20단어 사용)
 const getSimulationTitle = (requirement) => {
   if (!requirement) return t('common.label.unnamedSimulation')
   const title = requirement.slice(0, 20)
   return requirement.length > 20 ? title + '...' : title
 }
 
-// 格式化 simulation_id 显示（截取前6位）
+// 포맷 시뮬레이션_id 표시(처음 6자리 잘림)
 const formatSimulationId = (simulationId) => {
   if (!simulationId) return 'SIM_UNKNOWN'
   const prefix = simulationId.replace('sim_', '').slice(0, 6)
   return `SIM_${prefix.toUpperCase()}`
 }
 
-// 格式化轮数显示（当前轮/总轮数）
+// 형식화된 라운드 번호 표시(현재 라운드/총 라운드 수)
 const formatRounds = (simulation) => {
   const current = simulation.current_round || 0
   const total = simulation.total_rounds || 0
@@ -359,7 +358,7 @@ const formatRounds = (simulation) => {
   return `${current}/${total} ${t('history.roundsSuffix')}`
 }
 
-// 获取文件类型（用于样式）
+// 파일 형식 가져오기(스타일용)
 const getFileType = (filename) => {
   if (!filename) return 'other'
   const ext = filename.split('.').pop()?.toLowerCase()
@@ -375,35 +374,35 @@ const getFileType = (filename) => {
   return typeMap[ext] || 'other'
 }
 
-// 获取文件类型标签文本
+// 파일 형식 레이블 텍스트 가져오기
 const getFileTypeLabel = (filename) => {
   if (!filename) return 'FILE'
   const ext = filename.split('.').pop()?.toUpperCase()
   return ext || 'FILE'
 }
 
-// 截断文件名（保留扩展名）
+// 파일 이름 자르기(확장자 유지)
 const truncateFilename = (filename, maxLength) => {
   if (!filename) return t('common.label.unknownFile')
   if (filename.length <= maxLength) return filename
-  
+
   const ext = filename.includes('.') ? '.' + filename.split('.').pop() : ''
   const nameWithoutExt = filename.slice(0, filename.length - ext.length)
   const truncatedName = nameWithoutExt.slice(0, maxLength - ext.length - 3) + '...'
   return truncatedName + ext
 }
 
-// 打开项目详情弹窗
+// 프로젝트 세부정보 팝업창 열기
 const navigateToProject = (simulation) => {
   selectedProject.value = simulation
 }
 
-// 关闭弹窗
+// 팝업 창 닫기
 const closeModal = () => {
   selectedProject.value = null
 }
 
-// 导航到그래프 구축页面（Project）
+// 다음으로 이동그래프 구축페이지(프로젝트)
 const goToProject = () => {
   if (selectedProject.value?.project_id) {
     router.push({
@@ -414,7 +413,7 @@ const goToProject = () => {
   }
 }
 
-// 导航到环境配置页面（Simulation）
+// 환경 구성 페이지로 이동(시뮬레이션)
 const goToSimulation = () => {
   if (selectedProject.value?.simulation_id) {
     router.push({
@@ -425,7 +424,7 @@ const goToSimulation = () => {
   }
 }
 
-// 导航到분석 보고서页面（Report）
+// 다음으로 이동분석 보고서페이지(신고)
 const goToReport = () => {
   if (selectedProject.value?.report_id) {
     router.push({
@@ -436,7 +435,7 @@ const goToReport = () => {
   }
 }
 
-// 加载历史项目
+// 과거 항목 로드
 const loadHistory = async () => {
   try {
     loading.value = true
@@ -445,65 +444,65 @@ const loadHistory = async () => {
       projects.value = response.data || []
     }
   } catch (error) {
-    console.error('加载历史项目失败:', error)
+    console.error('기록 항목을 로드하지 못했습니다.:', error)
     projects.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 初始化 IntersectionObserver
+// IntersectionObserver 초기화
 const initObserver = () => {
   if (observer) {
     observer.disconnect()
   }
-  
+
   observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         const shouldExpand = entry.isIntersecting
-        
-        // 更新待执行的目标状态（无论是否在动画中都要记录最新的目标状态）
+
+        // 실행할 대상 상태 업데이트(애니메이션 여부에 관계없이 최신 대상 상태를 기록해야 함)
         pendingState = shouldExpand
-        
-        // 清除之前的防抖定时器（新的滚动意图会覆盖旧的）
+
+        // 이전 흔들림 방지 타이머를 지웁니다(새 스크롤 인텐트가 이전 스크롤 인텐트를 덮어씁니다).
         if (expandDebounceTimer) {
           clearTimeout(expandDebounceTimer)
           expandDebounceTimer = null
         }
-        
-        // 如果正在动画中，只记录状态，等动画结束后处理
+
+        // 애니메이션이 진행중인 경우 애니메이션 종료 후 상태만 기록 및 처리됩니다.
         if (isAnimating) return
-        
-        // 如果目标状态与当前状态相同，不需要处理
+
+        // 대상 상태가 현재 상태와 동일하면 처리가 필요하지 않습니다.
         if (shouldExpand === isExpanded.value) {
           pendingState = null
           return
         }
-        
-        // 使用防抖延迟状态切换，防止快速闪烁
-        // 展开时延迟较短(50ms)，收起时延迟较长(200ms)以增加稳定性
+
+        // 빠른 깜박임을 방지하기 위해 손떨림 방지 지연 상태 전환을 사용합니다.
+        // 펼칠 때 지연 시간(50ms)이 짧아지고 접었을 때 지연 시간(200ms)이 길어져 안정성이 향상됩니다.
         const delay = shouldExpand ? 50 : 200
-        
+
         expandDebounceTimer = setTimeout(() => {
-          // 检查是否正在动画
+          // 애니메이션이 발생하는지 확인
           if (isAnimating) return
-          
-          // 检查待执行状态是否仍需要执行（可能已被后续滚动覆盖）
+
+          // 보류 중인 실행 상태를 여전히 실행해야 하는지 확인합니다(이후 스크롤로 덮어쓰였을 수 있음).
           if (pendingState === null || pendingState === isExpanded.value) return
-          
-          // 设置动画锁
+
+          // 애니메이션 잠금 설정
           isAnimating = true
           isExpanded.value = pendingState
           pendingState = null
-          
-          // 动画完成后解除锁定，并检查是否有待处理的状态变化
+
+          // 애니메이션이 완료되면 잠금을 해제하고 보류 중인 상태 변경 사항이 있는지 확인하세요.
           setTimeout(() => {
             isAnimating = false
-            
-            // 动画结束后，检查是否有新的待执行状态
+
+            // 애니메이션 종료 후, 새로운 실행 상태가 있는지 확인
             if (pendingState !== null && pendingState !== isExpanded.value) {
-              // 延迟一小段时间再执行，避免太快切换
+              // 너무 빠른 전환을 피하기 위해 짧은 시간 동안 실행을 지연합니다.
               expandDebounceTimer = setTimeout(() => {
                 if (pendingState !== null && pendingState !== isExpanded.value) {
                   isAnimating = true
@@ -520,20 +519,20 @@ const initObserver = () => {
       })
     },
     {
-      // 使用多个阈值，使检测更平滑
+      // 여러 임계값을 사용하여 더 원활하게 감지
       threshold: [0.4, 0.6, 0.8],
-      // 调整 rootMargin，视口底部向上收缩，需要滚动更多才触发展开
+      // rootMargin을 조정하면 뷰포트 하단이 위쪽으로 줄어들고 확장을 트리거하려면 더 많은 스크롤이 필요합니다.
       rootMargin: '0px 0px -150px 0px'
     }
   )
-  
-  // 开始观察
+
+  // 관찰을 시작하다
   if (historyContainer.value) {
     observer.observe(historyContainer.value)
   }
 }
 
-// 监听路由变化，当返回首页时重新加载数据
+// 라우팅 변경 사항을 모니터링하고 홈페이지 복귀 시 데이터를 다시 로드하세요.
 watch(() => route.path, (newPath) => {
   if (newPath === '/') {
     loadHistory()
@@ -541,28 +540,28 @@ watch(() => route.path, (newPath) => {
 })
 
 onMounted(async () => {
-  // 确保 DOM 渲染完成后再加载数据
+  // 데이터를 로드하기 전에 DOM 렌더링이 완료되었는지 확인하세요.
   await nextTick()
   await loadHistory()
-  
-  // 等待 DOM 渲染后初始化观察器
+
+  // 관찰자를 초기화하기 전에 DOM이 렌더링될 때까지 기다립니다.
   setTimeout(() => {
     initObserver()
   }, 100)
 })
 
-// 如果使用 keep-alive，在组件激活时重新加载数据
+// 연결 유지를 사용하는 경우 구성 요소가 활성화되면 데이터를 다시 로드합니다.
 onActivated(() => {
   loadHistory()
 })
 
 onUnmounted(() => {
-  // 清理 Intersection Observer
+  // 교차로 관찰자 정리
   if (observer) {
     observer.disconnect()
     observer = null
   }
-  // 清理防抖定时器
+  // 손떨림 방지 타이머 지우기
   if (expandDebounceTimer) {
     clearTimeout(expandDebounceTimer)
     expandDebounceTimer = null
@@ -571,7 +570,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 容器 */
+/* 컨테이너 */
 .history-database {
   position: relative;
   width: 100%;
@@ -581,13 +580,13 @@ onUnmounted(() => {
   overflow: visible;
 }
 
-/* 无项目时简化显示 */
+/* 항목이 없을 때 단순화된 표시 */
 .history-database.no-projects {
   min-height: auto;
   padding: 40px 0 20px;
 }
 
-/* 技术网格背景 */
+/* 기술 그리드 배경 */
 .tech-grid-bg {
   position: absolute;
   top: 0;
@@ -598,18 +597,18 @@ onUnmounted(() => {
   pointer-events: none;
 }
 
-/* 使用CSS背景图案创建固定间距的正方形网格 */
+/* CSS 배경 패턴을 사용하여 고정된 간격의 사각형 그리드 만들기 */
 .grid-pattern {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
+  background-image:
     linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
   background-size: 50px 50px;
-  /* 从左上角开始定位，高度变化时只在底部扩展，不影响已有网格位置 */
+  /* 위치 지정은 왼쪽 상단부터 시작됩니다. 높이가 변경되면 아래쪽만 확장되며 기존 그리드 위치에는 영향을 주지 않습니다. */
   background-position: top left;
 }
 
@@ -619,13 +618,13 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: 
+  background:
     linear-gradient(to right, rgba(255, 255, 255, 0.9) 0%, transparent 15%, transparent 85%, rgba(255, 255, 255, 0.9) 100%),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.8) 0%, transparent 20%, transparent 80%, rgba(255, 255, 255, 0.8) 100%);
   pointer-events: none;
 }
 
-/* 标题区域 */
+/* 제목 영역 */
 .section-header {
   position: relative;
   z-index: 100;
@@ -653,7 +652,7 @@ onUnmounted(() => {
   text-transform: uppercase;
 }
 
-/* 卡片容器 */
+/* 카드 용기 */
 .cards-container {
   position: relative;
   display: flex;
@@ -661,10 +660,10 @@ onUnmounted(() => {
   align-items: flex-start;
   padding: 0 40px;
   transition: min-height 700ms cubic-bezier(0.23, 1, 0.32, 1);
-  /* min-height 由 JS 动态计算，根据卡片数量自适应 */
+  /* min-height JS에 의해 동적으로 계산되며 카드 수에 따라 적응 가능 */
 }
 
-/* 项目卡片 */
+/* 프로젝트 카드 */
 .project-card {
   position: absolute;
   width: 280px;
@@ -687,7 +686,7 @@ onUnmounted(() => {
   z-index: 1000 !important;
 }
 
-/* 卡片头部 */
+/* 카드 헤더 */
 .card-header {
   display: flex;
   justify-content: space-between;
@@ -705,7 +704,7 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-/* 功能状态图标组 */
+/* 기능 상태 아이콘 세트 */
 .card-status-icons {
   display: flex;
   align-items: center;
@@ -722,17 +721,17 @@ onUnmounted(() => {
   opacity: 1;
 }
 
-/* 不同功能的颜色 */
-.status-icon:nth-child(1).available { color: #3B82F6; } /* 그래프 구축 - 蓝色 */
-.status-icon:nth-child(2).available { color: #F59E0B; } /* 환경 구성 - 橙色 */
-.status-icon:nth-child(3).available { color: #10B981; } /* 분석 보고서 - 绿色 */
+/* 다양한 기능을 위한 색상 */
+.status-icon:nth-child(1).available { color: #3B82F6; } /* 그래프 구축 - 파란색 */
+.status-icon:nth-child(2).available { color: #F59E0B; } /* 환경 구성 - 오렌지색 */
+.status-icon:nth-child(3).available { color: #10B981; } /* 분석 보고서 - 녹색 */
 
 .status-icon.unavailable {
   color: #D1D5DB;
   opacity: 0.5;
 }
 
-/* 轮数进度显示 */
+/* 라운드 진행상황 표시 */
 .card-progress {
   display: flex;
   align-items: center;
@@ -746,13 +745,13 @@ onUnmounted(() => {
   font-size: 0.5rem;
 }
 
-/* 进度状态颜色 */
-.card-progress.completed { color: #10B981; }    /* 已完成 - 绿色 */
-.card-progress.in-progress { color: #F59E0B; }  /* 进行中 - 橙色 */
-.card-progress.not-started { color: #9CA3AF; }  /* 未开始 - 灰色 */
+/* 진행 상태 색상 */
+.card-progress.completed { color: #10B981; }    /* 완료됨 - 녹색 */
+.card-progress.in-progress { color: #F59E0B; }  /* 진행 중 - 주황색 */
+.card-progress.not-started { color: #9CA3AF; }  /* 시작되지 않음 - 회색 */
 .card-status.pending { color: #9CA3AF; }
 
-/* 文件列表区域 */
+/* 파일 목록 영역 */
 .card-files-wrapper {
   position: relative;
   width: 100%;
@@ -772,7 +771,7 @@ onUnmounted(() => {
   gap: 4px;
 }
 
-/* 更多文件提示 */
+/* 더 많은 파일 팁 */
 .files-more {
   display: flex;
   align-items: center;
@@ -802,7 +801,7 @@ onUnmounted(() => {
   border-color: #e5e7eb;
 }
 
-/* 简约文件标签样式 */
+/* 간단한 파일 라벨 스타일 */
 .file-tag {
   display: inline-flex;
   align-items: center;
@@ -820,7 +819,7 @@ onUnmounted(() => {
   min-width: 28px;
 }
 
-/* 低饱和度配色方案 - Morandi色系 */
+/* 저채도 배색 - Morandi 컬러 시스템 */
 .file-tag.pdf { background: #f2e6e6; color: #a65a5a; }
 .file-tag.doc { background: #e6eff5; color: #5a7ea6; }
 .file-tag.xls { background: #e6f2e8; color: #5aa668; }
@@ -841,7 +840,7 @@ onUnmounted(() => {
   letter-spacing: 0.1px;
 }
 
-/* 无文件时的占位 */
+/* 파일이 없을 때 자리표시자 */
 .files-empty {
   display: flex;
   align-items: center;
@@ -862,13 +861,13 @@ onUnmounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* 悬停时文件区域效果 */
+/* 마우스 오버 시 파일 영역 효과 */
 .project-card:hover .card-files-wrapper {
   border-color: #d1d5db;
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
 }
 
-/* 角落装饰 */
+/* 코너 장식 */
 .corner-mark.top-left-only {
   position: absolute;
   top: 6px;
@@ -881,7 +880,7 @@ onUnmounted(() => {
   z-index: 10;
 }
 
-/* 卡片标题 */
+/* 카드 제목 */
 .card-title {
   font-family: 'Inter', -apple-system, sans-serif;
   font-size: 0.9rem;
@@ -899,7 +898,7 @@ onUnmounted(() => {
   color: #2563EB;
 }
 
-/* 卡片描述 */
+/* 카드 설명 */
 .card-desc {
   font-family: 'Inter', sans-serif;
   font-size: 0.75rem;
@@ -913,7 +912,7 @@ onUnmounted(() => {
   -webkit-box-orient: vertical;
 }
 
-/* 卡片底部 */
+/* 카드 바닥 */
 .card-footer {
   position: relative;
   display: flex;
@@ -927,14 +926,14 @@ onUnmounted(() => {
   font-weight: 500;
 }
 
-/* 日期时间组合 */
+/* 날짜 시간 조합 */
 .card-datetime {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-/* 底部轮数进度显示 */
+/* 하단 라운드 진행 표시 */
 .card-footer .card-progress {
   display: flex;
   align-items: center;
@@ -948,12 +947,12 @@ onUnmounted(() => {
   font-size: 0.5rem;
 }
 
-/* 进度状态颜色 - 底部 */
+/* 진행 상태 색상 - 하단 */
 .card-footer .card-progress.completed { color: #10B981; }
 .card-footer .card-progress.in-progress { color: #F59E0B; }
 .card-footer .card-progress.not-started { color: #9CA3AF; }
 
-/* 底部装饰线 */
+/* 하단 장식선 */
 .card-bottom-line {
   position: absolute;
   bottom: 0;
@@ -969,7 +968,7 @@ onUnmounted(() => {
   width: 100%;
 }
 
-/* 空状态 */
+/* 빈 상태 */
 .empty-state, .loading-state {
   display: flex;
   flex-direction: column;
@@ -997,7 +996,7 @@ onUnmounted(() => {
   to { transform: rotate(360deg); }
 }
 
-/* 响应式 */
+/* 반응형 */
 @media (max-width: 1200px) {
   .project-card {
     width: 240px;
@@ -1013,7 +1012,7 @@ onUnmounted(() => {
   }
 }
 
-/* ===== 历史回放详情弹窗样式 ===== */
+/* ===== 기록 재생 세부 정보 팝업 창 스타일 ===== */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1039,7 +1038,7 @@ onUnmounted(() => {
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
-/* 动画过渡 */
+/* 애니메이션 전환 */
 .modal-enter-active,
 .modal-leave-active {
   transition: opacity 0.3s ease;
@@ -1068,7 +1067,7 @@ onUnmounted(() => {
   opacity: 0;
 }
 
-/* 弹窗头部 */
+/* 팝업 헤더 */
 .modal-header {
   display: flex;
   justify-content: space-between;
@@ -1135,7 +1134,7 @@ onUnmounted(() => {
   color: #111827;
 }
 
-/* 弹窗内容 */
+/* 팝업 콘텐츠 */
 .modal-body {
   padding: 24px 32px;
 }
@@ -1177,7 +1176,7 @@ onUnmounted(() => {
   padding-right: 4px;
 }
 
-/* 自定义滚动条样式 */
+/* 사용자 정의 스크롤 막대 스타일 */
 .modal-files::-webkit-scrollbar {
   width: 4px;
 }
@@ -1231,7 +1230,7 @@ onUnmounted(() => {
   text-align: center;
 }
 
-/* 기록 재생分割线 */
+/* 기록 재생구분선 */
 .modal-divider {
   display: flex;
   align-items: center;
@@ -1255,7 +1254,7 @@ onUnmounted(() => {
   white-space: nowrap;
 }
 
-/* 导航按钮 */
+/* 탐색 버튼 */
 .modal-actions {
   display: flex;
   gap: 16px;
@@ -1322,7 +1321,7 @@ onUnmounted(() => {
   color: #111827;
 }
 
-/* 不可回放提示 */
+/* 재생할 수 없음 프롬프트 */
 .modal-playback-hint {
   display: flex;
   align-items: center;

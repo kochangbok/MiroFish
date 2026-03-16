@@ -1,15 +1,15 @@
 <template>
   <div class="main-view">
-    <!-- Header -->
+
     <header class="app-header">
       <div class="header-left">
         <div class="brand" @click="router.push('/')">MIROFISH</div>
       </div>
-      
+
       <div class="header-center">
         <div class="view-switcher">
-          <button 
-            v-for="mode in ['graph', 'split', 'workbench']" 
+          <button
+            v-for="mode in ['graph', 'split', 'workbench']"
             :key="mode"
             class="switch-btn"
             :class="{ active: viewMode === mode }"
@@ -33,11 +33,11 @@
       </div>
     </header>
 
-    <!-- Main Content Area -->
+
     <main class="content-area">
-      <!-- Left Panel: Graph -->
+
       <div class="panel-wrapper left" :style="leftPanelStyle">
-        <GraphPanel 
+        <GraphPanel
           :graphData="graphData"
           :loading="graphLoading"
           :currentPhase="5"
@@ -47,7 +47,7 @@
         />
       </div>
 
-      <!-- Right Panel: Step5 深度互动 -->
+
       <div class="panel-wrapper right" :style="rightPanelStyle">
         <Step5Interaction
           :reportId="currentReportId"
@@ -80,7 +80,7 @@ const props = defineProps({
   reportId: String
 })
 
-// Layout State - 默认切换到工作台视角
+// Layout State - 기본적으로 워크벤치 관점으로 전환
 const viewMode = ref('workbench')
 const modeLabels = computed(() => ({
   graph: t('common.view.graph'),
@@ -147,28 +147,28 @@ const toggleMaximize = (target) => {
 // --- Data Logic ---
 const loadReportData = async () => {
   try {
-    addLog(`加载报告数据: ${currentReportId.value}`)
-    
-    // 获取 report 信息以获取 simulation_id
+    addLog(`보고서 데이터 로드: ${currentReportId.value}`)
+
+    // 시뮬레이션을 위한 보고서 정보 얻기_id
     const reportRes = await getReport(currentReportId.value)
     if (reportRes.success && reportRes.data) {
       const reportData = reportRes.data
       simulationId.value = reportData.simulation_id
-      
+
       if (simulationId.value) {
-        // 获取 simulation 信息
+        // 시뮬레이션 정보 얻기
         const simRes = await getSimulation(simulationId.value)
         if (simRes.success && simRes.data) {
           const simData = simRes.data
-          
-          // 获取 project 信息
+
+          // 프로젝트 정보 얻기
           if (simData.project_id) {
             const projRes = await getProject(simData.project_id)
             if (projRes.success && projRes.data) {
               projectData.value = projRes.data
-              addLog(`项目加载成功: ${projRes.data.project_id}`)
-              
-              // 获取 graph 数据
+              addLog(`프로젝트가 성공적으로 로드되었습니다.: ${projRes.data.project_id}`)
+
+              // 그래프 데이터 가져오기
               if (projRes.data.graph_id) {
                 await loadGraph(projRes.data.graph_id)
               }
@@ -177,24 +177,24 @@ const loadReportData = async () => {
         }
       }
     } else {
-      addLog(`获取报告信息失败: ${reportRes.error || '未知错误'}`)
+      addLog(`보고서 정보를 가져오지 못했습니다.: ${reportRes.error || '알 수 없는 오류'}`)
     }
   } catch (err) {
-    addLog(`加载异常: ${err.message}`)
+    addLog(`로딩 예외: ${err.message}`)
   }
 }
 
 const loadGraph = async (graphId) => {
   graphLoading.value = true
-  
+
   try {
     const res = await getGraphData(graphId)
     if (res.success) {
       graphData.value = res.data
-      addLog('图谱数据加载成功')
+      addLog('스펙트럼 데이터가 성공적으로 로드되었습니다.')
     }
   } catch (err) {
-    addLog(`图谱加载失败: ${err.message}`)
+    addLog(`지도를 로드하지 못했습니다.: ${err.message}`)
   } finally {
     graphLoading.value = false
   }
@@ -215,7 +215,7 @@ watch(() => route.params.reportId, (newId) => {
 }, { immediate: true })
 
 onMounted(() => {
-  addLog('InteractionView 初始化')
+  addLog('InteractionView 초기화')
   loadReportData()
 })
 </script>

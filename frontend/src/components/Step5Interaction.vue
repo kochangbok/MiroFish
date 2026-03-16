@@ -1,11 +1,11 @@
 <template>
   <div class="interaction-panel">
-    <!-- Main Split Layout -->
+
     <div class="main-split-layout">
-      <!-- LEFT PANEL: Report Style -->
+
       <div class="left-panel report-style" ref="leftPanel">
         <div v-if="reportOutline" class="report-content-wrapper">
-          <!-- Report Header -->
+
           <div class="report-header-block">
             <div class="report-meta">
               <span class="report-tag">{{ t('step4.reportTag') }}</span>
@@ -16,13 +16,13 @@
             <div class="header-divider"></div>
           </div>
 
-          <!-- Sections List -->
+
           <div class="sections-list">
-            <div 
-              v-for="(section, idx) in reportOutline.sections" 
+            <div
+              v-for="(section, idx) in reportOutline.sections"
               :key="idx"
               class="report-section-item"
-              :class="{ 
+              :class="{
                 'is-active': currentSectionIndex === idx + 1,
                 'is-completed': isSectionCompleted(idx + 1),
                 'is-pending': !isSectionCompleted(idx + 1) && currentSectionIndex !== idx + 1
@@ -31,26 +31,26 @@
               <div class="section-header-row" @click="toggleSectionCollapse(idx)" :class="{ 'clickable': isSectionCompleted(idx + 1) }">
                 <span class="section-number">{{ String(idx + 1).padStart(2, '0') }}</span>
                 <h3 class="section-title">{{ section.title }}</h3>
-                <svg 
-                  v-if="isSectionCompleted(idx + 1)" 
-                  class="collapse-icon" 
+                <svg
+                  v-if="isSectionCompleted(idx + 1)"
+                  class="collapse-icon"
                   :class="{ 'is-collapsed': collapsedSections.has(idx) }"
-                  viewBox="0 0 24 24" 
-                  width="20" 
-                  height="20" 
-                  fill="none" 
-                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                  width="20"
+                  height="20"
+                  fill="none"
+                  stroke="currentColor"
                   stroke-width="2"
                 >
                   <polyline points="6 9 12 15 18 9"></polyline>
                 </svg>
               </div>
-              
+
               <div class="section-body" v-show="!collapsedSections.has(idx)">
-                <!-- Completed Content -->
+
                 <div v-if="generatedSections[idx + 1]" class="generated-content" v-html="renderMarkdown(generatedSections[idx + 1])"></div>
-                
-                <!-- Loading State -->
+
+
                 <div v-else-if="currentSectionIndex === idx + 1" class="loading-state">
                   <div class="loading-icon">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -65,7 +65,7 @@
           </div>
         </div>
 
-        <!-- Waiting State -->
+
         <div v-if="!reportOutline" class="waiting-placeholder">
           <div class="waiting-animation">
             <div class="waiting-ring"></div>
@@ -76,9 +76,9 @@
         </div>
       </div>
 
-      <!-- RIGHT PANEL: Interaction Interface -->
+
       <div class="right-panel" ref="rightPanel">
-        <!-- Unified Action Bar - Professional Design -->
+
         <div class="action-bar">
         <div class="action-bar-header">
           <svg class="action-bar-icon" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -90,7 +90,7 @@
           </div>
         </div>
           <div class="action-bar-tabs">
-            <button 
+            <button
               class="tab-pill"
               :class="{ active: activeTab === 'chat' && chatTarget === 'report_agent' }"
               @click="selectReportAgentChat"
@@ -101,7 +101,7 @@
               <span>{{ t('step5.chatWithReportAgent') }}</span>
             </button>
             <div class="agent-dropdown" v-if="profiles.length > 0">
-              <button 
+              <button
                 class="tab-pill agent-pill"
                 :class="{ active: activeTab === 'chat' && chatTarget === 'agent' }"
                 @click="toggleAgentDropdown"
@@ -117,8 +117,8 @@
               </button>
               <div v-if="showAgentDropdown" class="dropdown-menu">
                 <div class="dropdown-header">{{ t('step5.selectTarget') }}</div>
-                <div 
-                  v-for="(agent, idx) in profiles" 
+                <div
+                  v-for="(agent, idx) in profiles"
                   :key="idx"
                   class="dropdown-item"
                   @click="selectAgent(agent, idx)"
@@ -132,7 +132,7 @@
               </div>
             </div>
             <div class="tab-divider"></div>
-            <button 
+            <button
               class="tab-pill survey-pill"
               :class="{ active: activeTab === 'survey' }"
               @click="selectSurveyTab"
@@ -146,10 +146,10 @@
           </div>
         </div>
 
-        <!-- Chat Mode -->
+
         <div v-if="activeTab === 'chat'" class="chat-container">
 
-          <!-- Report Agent Tools Card -->
+
           <div v-if="chatTarget === 'report_agent'" class="report-agent-tools-card">
             <div class="tools-card-header">
               <div class="tools-card-avatar">R</div>
@@ -216,7 +216,7 @@
             </div>
           </div>
 
-          <!-- Agent Profile Card -->
+
           <div v-if="chatTarget === 'agent' && selectedAgent" class="agent-profile-card">
             <div class="profile-card-header">
               <div class="profile-card-avatar">{{ (selectedAgent.username || 'A')[0] }}</div>
@@ -241,7 +241,7 @@
             </div>
           </div>
 
-          <!-- Chat Messages -->
+
           <div class="chat-messages" ref="chatMessages">
             <div v-if="chatHistory.length === 0" class="chat-empty">
               <div class="empty-icon">
@@ -253,8 +253,8 @@
                 {{ chatTarget === 'report_agent' ? t('step5.emptyChatReport') : t('step5.emptyChatAgent') }}
               </p>
             </div>
-            <div 
-              v-for="(msg, idx) in chatHistory" 
+            <div
+              v-for="(msg, idx) in chatHistory"
               :key="idx"
               class="chat-message"
               :class="msg.role"
@@ -287,9 +287,9 @@
             </div>
           </div>
 
-          <!-- Chat Input -->
+
           <div class="chat-input-area">
-            <textarea 
+            <textarea
               v-model="chatInput"
               class="chat-input"
               :placeholder="t('step5.chatPlaceholder')"
@@ -298,7 +298,7 @@
               rows="1"
               ref="chatInputRef"
             ></textarea>
-            <button 
+            <button
               class="send-btn"
               @click="sendMessage"
               :disabled="!chatInput.trim() || isSending || (!selectedAgent && chatTarget === 'agent')"
@@ -311,9 +311,9 @@
           </div>
         </div>
 
-        <!-- Survey Mode -->
+
         <div v-if="activeTab === 'survey'" class="survey-container">
-          <!-- Survey Setup -->
+
           <div class="survey-setup">
             <div class="setup-section">
               <div class="section-header">
@@ -321,14 +321,14 @@
                 <span class="selection-count">{{ t('step5.selectedCount', { selected: selectedAgents.size, total: profiles.length }) }}</span>
               </div>
               <div class="agents-grid">
-                <label 
-                  v-for="(agent, idx) in profiles" 
+                <label
+                  v-for="(agent, idx) in profiles"
                   :key="idx"
                   class="agent-checkbox"
                   :class="{ checked: selectedAgents.has(idx) }"
                 >
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     :checked="selectedAgents.has(idx)"
                     @change="toggleAgentSelection(idx)"
                   >
@@ -355,7 +355,7 @@
               <div class="section-header">
                 <span class="section-title">{{ t('step5.surveyQuestion') }}</span>
               </div>
-              <textarea 
+              <textarea
                 v-model="surveyQuestion"
                 class="survey-input"
                 :placeholder="t('step5.surveyPlaceholder')"
@@ -363,7 +363,7 @@
               ></textarea>
             </div>
 
-            <button 
+            <button
               class="survey-submit-btn"
               :disabled="selectedAgents.size === 0 || !surveyQuestion.trim() || isSurveying"
               @click="submitSurvey"
@@ -373,15 +373,15 @@
             </button>
           </div>
 
-          <!-- Survey Results -->
+
           <div v-if="surveyResults.length > 0" class="survey-results">
             <div class="results-header">
               <span class="results-title">{{ t('step5.surveyResults') }}</span>
               <span class="results-count">{{ t('step5.surveyReplies', { count: surveyResults.length }) }}</span>
             </div>
             <div class="results-list">
-              <div 
-                v-for="(result, idx) in surveyResults" 
+              <div
+                v-for="(result, idx) in surveyResults"
                 :key="idx"
                 class="result-card"
               >
@@ -436,7 +436,7 @@ const showToolsDetail = ref(true)
 // Chat State
 const chatInput = ref('')
 const chatHistory = ref([])
-const chatHistoryCache = ref({}) // 缓存所有对话记录: { 'report_agent': [], 'agent_0': [], 'agent_1': [], ... }
+const chatHistoryCache = ref({}) // 모든 대화 기록 캐시: { 'report_agent': [], 'agent_0': [], 'agent_1': [], ... }
 const isSending = ref(false)
 const chatMessages = ref(null)
 const chatInputRef = ref(null)
@@ -486,10 +486,10 @@ const selectChatTarget = (target) => {
   }
 }
 
-// 保存当前对话记录到缓存
+// 현재 대화 기록을 캐시에 저장
 const saveChatHistory = () => {
   if (chatHistory.value.length === 0) return
-  
+
   if (chatTarget.value === 'report_agent') {
     chatHistoryCache.value['report_agent'] = [...chatHistory.value]
   } else if (selectedAgentIndex.value !== null) {
@@ -498,16 +498,16 @@ const saveChatHistory = () => {
 }
 
 const selectReportAgentChat = () => {
-  // 保存当前对话记录
+  // 현재 대화 기록 저장
   saveChatHistory()
-  
+
   activeTab.value = 'chat'
   chatTarget.value = 'report_agent'
   selectedAgent.value = null
   selectedAgentIndex.value = null
   showAgentDropdown.value = false
-  
-  // 恢复 Report Agent 的对话记录
+
+  // 신고 상담원 대화 기록 복원
   chatHistory.value = chatHistoryCache.value['report_agent'] || []
 }
 
@@ -527,25 +527,25 @@ const toggleAgentDropdown = () => {
 }
 
 const selectAgent = (agent, idx) => {
-  // 保存当前对话记录
+  // 현재 대화 기록 저장
   saveChatHistory()
-  
+
   selectedAgent.value = agent
   selectedAgentIndex.value = idx
   chatTarget.value = 'agent'
   showAgentDropdown.value = false
-  
-  // 恢复该 Agent 的对话记录
+
+  // 상담원의 대화 기록 복원
   chatHistory.value = chatHistoryCache.value[`agent_${idx}`] || []
-  addLog(`选择对话对象: ${agent.username}`)
+  addLog(`대화할 사람을 선택하세요: ${agent.username}`)
 }
 
 const formatTime = (timestamp) => {
   if (!timestamp) return ''
   try {
-    return new Date(timestamp).toLocaleTimeString('en-US', { 
-      hour12: false, 
-      hour: '2-digit', 
+    return new Date(timestamp).toLocaleTimeString('en-US', {
+      hour12: false,
+      hour: '2-digit',
       minute: '2-digit'
     })
   } catch {
@@ -555,7 +555,7 @@ const formatTime = (timestamp) => {
 
 const renderMarkdown = (content) => {
   if (!content) return ''
-  
+
   let processedContent = content.replace(/^##\s+.+\n+/, '')
   let html = processedContent.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre class="code-block"><code>$2</code></pre>')
   html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>')
@@ -564,8 +564,8 @@ const renderMarkdown = (content) => {
   html = html.replace(/^## (.+)$/gm, '<h3 class="md-h3">$1</h3>')
   html = html.replace(/^# (.+)$/gm, '<h2 class="md-h2">$1</h2>')
   html = html.replace(/^> (.+)$/gm, '<blockquote class="md-quote">$1</blockquote>')
-  
-  // 处理列表 - 支持子列表
+
+  // 처리 목록 - 하위 목록 지원
   html = html.replace(/^(\s*)- (.+)$/gm, (match, indent, text) => {
     const level = Math.floor(indent.length / 2)
     return `<li class="md-li" data-level="${level}">${text}</li>`
@@ -574,21 +574,21 @@ const renderMarkdown = (content) => {
     const level = Math.floor(indent.length / 2)
     return `<li class="md-oli" data-level="${level}">${text}</li>`
   })
-  
-  // 包装无序列表
+
+  // 래퍼 순서가 지정되지 않은 목록
   html = html.replace(/(<li class="md-li"[^>]*>.*?<\/li>\s*)+/g, '<ul class="md-ul">$&</ul>')
-  // 包装有序列表
+  // 포장 주문 목록
   html = html.replace(/(<li class="md-oli"[^>]*>.*?<\/li>\s*)+/g, '<ol class="md-ol">$&</ol>')
-  
-  // 清理列表项之间的所有空白
+
+  // 목록 항목 사이의 모든 공백을 정리합니다.
   html = html.replace(/<\/li>\s+<li/g, '</li><li')
-  // 清理列表开始标签后的空白
+  // 목록 시작 태그 뒤의 공간을 정리하세요.
   html = html.replace(/<ul class="md-ul">\s+/g, '<ul class="md-ul">')
   html = html.replace(/<ol class="md-ol">\s+/g, '<ol class="md-ol">')
-  // 清理列表结束标签前的空白
+  // 목록의 종료 태그 앞의 공백을 지웁니다.
   html = html.replace(/\s+<\/ul>/g, '</ul>')
   html = html.replace(/\s+<\/ol>/g, '</ol>')
-  
+
   html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
   html = html.replace(/\*(.+?)\*/g, '<em>$1</em>')
   html = html.replace(/_(.+?)_/g, '<em>$1</em>')
@@ -601,17 +601,17 @@ const renderMarkdown = (content) => {
   html = html.replace(/(<\/h[2-5]>)<\/p>/g, '$1')
   html = html.replace(/<p class="md-p">(<ul|<ol|<blockquote|<pre|<hr)/g, '$1')
   html = html.replace(/(<\/ul>|<\/ol>|<\/blockquote>|<\/pre>)<\/p>/g, '$1')
-  // 清理块级元素前后的 <br> 标签
+  // 블록 수준 요소 전후 정리 <br> 상표
   html = html.replace(/<br>\s*(<ul|<ol|<blockquote)/g, '$1')
   html = html.replace(/(<\/ul>|<\/ol>|<\/blockquote>)\s*<br>/g, '$1')
-  // 清理 <p><br> 紧跟块级元素的情况（多余空行导致）
+  // 청소하다 <p><br> 다음 블록 수준 요소(추가 빈 줄로 인해 발생)
   html = html.replace(/<p class="md-p">(<br>\s*)+(<ul|<ol|<blockquote|<pre|<hr)/g, '$2')
-  // 清理连续的 <br> 标签
+  // 연속 청소 <br> 상표
   html = html.replace(/(<br>\s*){2,}/g, '<br>')
-  // 清理块级元素后紧跟的段落开始标签前的 <br>
+  // 블록 수준 요소 바로 뒤에 있는 단락 열기 태그를 정리합니다. <br>
   html = html.replace(/(<\/ol>|<\/ul>|<\/blockquote>)<br>(<p|<div)/g, '$1$2')
 
-  // 修复非连续有序列表的编号：当单项 <ol> 被段落内容隔开时，保持编号递增
+  // 연속되지 않은 순서 목록의 번호 매기기 수정: 단일 항목인 경우 <ol> 단락 내용으로 구분할 때 번호가 계속 증가합니다.
   const tokens = html.split(/(<ol class="md-ol">(?:<li class="md-oli"[^>]*>[\s\S]*?<\/li>)+<\/ol>)/g)
   let olCounter = 0
   let inSequence = false
@@ -643,20 +643,20 @@ const renderMarkdown = (content) => {
 // Chat Methods
 const sendMessage = async () => {
   if (!chatInput.value.trim() || isSending.value) return
-  
+
   const message = chatInput.value.trim()
   chatInput.value = ''
-  
+
   // Add user message
   chatHistory.value.push({
     role: 'user',
     content: message,
     timestamp: new Date().toISOString()
   })
-  
+
   scrollToBottom()
   isSending.value = true
-  
+
   try {
     if (chatTarget.value === 'report_agent') {
       await sendToReportAgent(message)
@@ -664,7 +664,7 @@ const sendMessage = async () => {
       await sendToAgent(message)
     }
   } catch (err) {
-    addLog(`发送失败: ${err.message}`)
+    addLog(`전송 실패: ${err.message}`)
     chatHistory.value.push({
       role: 'assistant',
       content: t('step5.sorryError', { message: err.message }),
@@ -673,14 +673,14 @@ const sendMessage = async () => {
   } finally {
     isSending.value = false
     scrollToBottom()
-    // 自动保存对话记录到缓存
+    // 대화 기록을 자동으로 캐시에 저장
     saveChatHistory()
   }
 }
 
 const sendToReportAgent = async (message) => {
-  addLog(`向 Report Agent 发送: ${message.substring(0, 50)}...`)
-  
+  addLog(`신고 상담원에게 보내기: ${message.substring(0, 50)}...`)
+
   // Build chat history for API
   const historyForApi = chatHistory.value
     .filter(msg => msg.role !== 'user' || msg.content !== message)
@@ -689,32 +689,32 @@ const sendToReportAgent = async (message) => {
       role: msg.role,
       content: msg.content
     }))
-  
+
   const res = await chatWithReport({
     simulation_id: props.simulationId,
     message: message,
     chat_history: historyForApi
   })
-  
+
   if (res.success && res.data) {
     chatHistory.value.push({
       role: 'assistant',
       content: res.data.response || res.data.answer || t('common.label.noResponse'),
       timestamp: new Date().toISOString()
     })
-    addLog('Report Agent 已回复')
+    addLog('Report Agent 답변됨')
   } else {
-    throw new Error(rt(res.error || '请求失败'))
+    throw new Error(rt(res.error || '요청 실패'))
   }
 }
 
 const sendToAgent = async (message) => {
   if (!selectedAgent.value || selectedAgentIndex.value === null) {
-    throw new Error(rt('请先选择一个模拟个体'))
+    throw new Error(rt('먼저 시뮬레이션된 개인을 선택하세요.'))
   }
-  
-  addLog(`向 ${selectedAgent.value.username} 发送: ${message.substring(0, 50)}...`)
-  
+
+  addLog(`쪽으로 ${selectedAgent.value.username} 보내다: ${message.substring(0, 50)}...`)
+
   // Build prompt with chat history
   let prompt = message
   if (chatHistory.value.length > 1) {
@@ -725,7 +725,7 @@ const sendToAgent = async (message) => {
       .join('\n')
     prompt = `${t('step5.previousConversation')}\n${historyContext}\n\n${t('step5.newQuestion')} ${message}`
   }
-  
+
   const res = await interviewAgents({
     simulation_id: props.simulationId,
     interviews: [{
@@ -733,19 +733,19 @@ const sendToAgent = async (message) => {
       prompt: prompt
     }]
   })
-  
+
   if (res.success && res.data) {
-    // 正确的数据路径: res.data.result.results 是一个对象字典
-    // 格式: {"twitter_0": {...}, "reddit_0": {...}} 或单平台 {"reddit_0": {...}}
+    // 올바른 데이터 경로: res.data.result.results 객체 사전입니다
+    // 체재: {"twitter_0": {...}, "reddit_0": {...}} 또는 단일 플랫폼 {"reddit_0": {...}}
     const resultData = res.data.result || res.data
     const resultsDict = resultData.results || resultData
-    
-    // 将对象字典转换为数组，优先获取 reddit 平台的回复
+
+    // 객체 사전을 배열로 변환하고 먼저 Reddit 플랫폼에서 응답을 받으세요.
     let responseContent = null
     const agentId = selectedAgentIndex.value
-    
+
     if (typeof resultsDict === 'object' && !Array.isArray(resultsDict)) {
-      // 优先使用 reddit 平台回复，其次 twitter
+      // 응답하려면 Reddit 플랫폼을 먼저 사용하고 그 다음에는 Twitter를 사용하세요.
       const redditKey = `reddit_${agentId}`
       const twitterKey = `twitter_${agentId}`
       const agentResult = resultsDict[redditKey] || resultsDict[twitterKey] || Object.values(resultsDict)[0]
@@ -753,22 +753,22 @@ const sendToAgent = async (message) => {
         responseContent = agentResult.response || agentResult.answer
       }
     } else if (Array.isArray(resultsDict) && resultsDict.length > 0) {
-      // 兼容数组格式
+      // 호환 가능한 배열 형식
       responseContent = resultsDict[0].response || resultsDict[0].answer
     }
-    
+
     if (responseContent) {
       chatHistory.value.push({
         role: 'assistant',
         content: responseContent,
         timestamp: new Date().toISOString()
       })
-      addLog(`${selectedAgent.value.username} 已回复`)
+      addLog(`${selectedAgent.value.username} 답변됨`)
     } else {
-      throw new Error(rt('无响应数据'))
+      throw new Error(rt('응답 데이터 없음'))
     }
   } else {
-    throw new Error(rt(res.error || '请求失败'))
+    throw new Error(rt(res.error || '요청 실패'))
   }
 }
 
@@ -803,37 +803,37 @@ const clearAgentSelection = () => {
 
 const submitSurvey = async () => {
   if (selectedAgents.value.size === 0 || !surveyQuestion.value.trim()) return
-  
+
   isSurveying.value = true
-  addLog(`发送问卷给 ${selectedAgents.value.size} 个对象...`)
-  
+  addLog(`설문지 보내기 ${selectedAgents.value.size} 사물...`)
+
   try {
     const interviews = Array.from(selectedAgents.value).map(idx => ({
       agent_id: idx,
       prompt: surveyQuestion.value.trim()
     }))
-    
+
     const res = await interviewAgents({
       simulation_id: props.simulationId,
       interviews: interviews
     })
-    
+
     if (res.success && res.data) {
-      // 正确的数据路径: res.data.result.results 是一个对象字典
-      // 格式: {"twitter_0": {...}, "reddit_0": {...}, "twitter_1": {...}, ...}
+      // 올바른 데이터 경로: res.data.result.results 객체 사전입니다
+      // 체재: {"twitter_0": {...}, "reddit_0": {...}, "twitter_1": {...}, ...}
       const resultData = res.data.result || res.data
       const resultsDict = resultData.results || resultData
-      
-      // 将对象字典转换为数组格式
+
+      // 객체 사전을 배열 형식으로 변환
       const surveyResultsList = []
-      
+
       for (const interview of interviews) {
         const agentIdx = interview.agent_id
         const agent = profiles.value[agentIdx]
-        
-        // 优先使用 reddit 平台回复，其次 twitter
+
+        // 응답하려면 Reddit 플랫폼을 먼저 사용하고 그 다음에는 Twitter를 사용하세요.
         let responseContent = t('common.label.noResponse')
-        
+
         if (typeof resultsDict === 'object' && !Array.isArray(resultsDict)) {
           const redditKey = `reddit_${agentIdx}`
           const twitterKey = `twitter_${agentIdx}`
@@ -842,13 +842,13 @@ const submitSurvey = async () => {
             responseContent = agentResult.response || agentResult.answer || t('common.label.noResponse')
           }
         } else if (Array.isArray(resultsDict)) {
-          // 兼容数组格式
+          // 호환 가능한 배열 형식
           const matchedResult = resultsDict.find(r => r.agent_id === agentIdx)
           if (matchedResult) {
             responseContent = matchedResult.response || matchedResult.answer || t('common.label.noResponse')
           }
         }
-        
+
         surveyResultsList.push({
           agent_id: agentIdx,
           agent_name: agent?.username || `${t('step5.agent')} ${agentIdx}`,
@@ -857,14 +857,14 @@ const submitSurvey = async () => {
           answer: responseContent
         })
       }
-      
+
       surveyResults.value = surveyResultsList
-      addLog(`收到 ${surveyResults.value.length} 条回复`)
+      addLog(`받다 ${surveyResults.value.length} 답글`)
     } else {
-      throw new Error(rt(res.error || '请求失败'))
+      throw new Error(rt(res.error || '요청 실패'))
     }
   } catch (err) {
-    addLog(`问卷发送失败: ${err.message}`)
+    addLog(`설문지 전송 실패: ${err.message}`)
   } finally {
     isSurveying.value = false
   }
@@ -873,10 +873,10 @@ const submitSurvey = async () => {
 // Load Report Data
 const loadReportData = async () => {
   if (!props.reportId) return
-  
+
   try {
-    addLog(`加载报告数据: ${props.reportId}`)
-    
+    addLog(`보고서 데이터 로드: ${props.reportId}`)
+
     // Get report info
     const reportRes = await getReport(props.reportId)
     if (reportRes.success && reportRes.data) {
@@ -884,46 +884,46 @@ const loadReportData = async () => {
       await loadAgentLogs()
     }
   } catch (err) {
-    addLog(`加载报告失败: ${err.message}`)
+    addLog(`보고서를 로드하지 못했습니다.: ${err.message}`)
   }
 }
 
 const loadAgentLogs = async () => {
   if (!props.reportId) return
-  
+
   try {
     const res = await getAgentLog(props.reportId, 0)
     if (res.success && res.data) {
       const logs = res.data.logs || []
-      
+
       logs.forEach(log => {
         if (log.action === 'planning_complete' && log.details?.outline) {
           reportOutline.value = log.details.outline
         }
-        
+
         if (log.action === 'section_complete' && log.section_index < 100 && log.details?.content) {
           generatedSections.value[log.section_index] = log.details.content
         }
       })
-      
-      addLog('报告数据加载完成')
+
+      addLog('보고서 데이터 로드가 완료되었습니다.')
     }
   } catch (err) {
-    addLog(`加载报告日志失败: ${err.message}`)
+    addLog(`보고서 로그를 로드하지 못했습니다.: ${err.message}`)
   }
 }
 
 const loadProfiles = async () => {
   if (!props.simulationId) return
-  
+
   try {
     const res = await getSimulationProfilesRealtime(props.simulationId, 'reddit')
     if (res.success && res.data) {
       profiles.value = res.data.profiles || []
-      addLog(`加载了 ${profiles.value.length} 个模拟个体`)
+      addLog(`짐을 실은 ${profiles.value.length} 시뮬레이션된 개인`)
     }
   } catch (err) {
-    addLog(`加载模拟个体失败: ${err.message}`)
+    addLog(`시뮬레이션된 엔터티를 로드하지 못했습니다.: ${err.message}`)
   }
 }
 
@@ -937,7 +937,7 @@ const handleClickOutside = (e) => {
 
 // Lifecycle
 onMounted(() => {
-  addLog('Step5 深度互动初始化')
+  addLog('Step5 심층적인 대화형 초기화')
   loadReportData()
   loadProfiles()
   document.addEventListener('click', handleClickOutside)
@@ -982,7 +982,7 @@ watch(() => props.simulationId, (newId) => {
   overflow: hidden;
 }
 
-/* Left Panel - Report Style (与 Step4Report.vue 完全一致) */
+/* Left Panel - Report Style (Step4Report와 함께.vue 완전 일치) */
 .left-panel.report-style {
   width: 45%;
   min-width: 450px;
@@ -2030,7 +2030,7 @@ watch(() => props.simulationId, (newId) => {
   margin-bottom: 0;
 }
 
-/* 修复有序列表编号 - 使用 CSS 计数器让多个 ol 连续编号 */
+/* 순서가 지정된 목록 번호 매기기 수정 - CSS 카운터를 사용하여 여러 ol에 연속적으로 번호를 매깁니다. */
 .message-text {
   counter-reset: list-counter;
 }
@@ -2056,7 +2056,7 @@ watch(() => props.simulationId, (newId) => {
   flex-shrink: 0;
 }
 
-/* 无序列表样式 */
+/* 순서가 지정되지 않은 목록 스타일 */
 .message-text :deep(.md-ul) {
   padding-left: 20px;
   margin: 8px 0;
@@ -2535,7 +2535,7 @@ watch(() => props.simulationId, (newId) => {
   margin: 6px 0;
 }
 
-/* 聊天/问卷区域的引用样式 */
+/* 채팅/설문지 영역의 참고 스타일 */
 .chat-messages :deep(.md-quote),
 .result-answer :deep(.md-quote) {
   margin: 12px 0;

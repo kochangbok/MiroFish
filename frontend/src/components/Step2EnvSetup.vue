@@ -1,7 +1,7 @@
 <template>
   <div class="env-setup-panel">
     <div class="scroll-container">
-      <!-- Step 01: 模拟实例 -->
+
       <div class="step-card" :class="{ 'active': phase === 0, 'completed': phase > 0 }">
         <div class="card-header">
           <div class="step-info">
@@ -13,7 +13,7 @@
             <span v-else class="badge processing">{{ t('step2.initializing') }}</span>
           </div>
         </div>
-        
+
         <div class="card-content">
           <p class="api-note">POST /api/simulation/create</p>
           <p class="description">
@@ -41,7 +41,7 @@
         </div>
       </div>
 
-      <!-- Step 02: 生成 Agent 人设 -->
+
       <div class="step-card" :class="{ 'active': phase === 1, 'completed': phase > 1 }">
         <div class="card-header">
           <div class="step-info">
@@ -61,7 +61,7 @@
             {{ t('step2.agentDesc') }}
           </p>
 
-          <!-- Profiles Stats -->
+
           <div v-if="profiles.length > 0" class="stats-grid">
             <div class="stat-card">
               <span class="stat-value">{{ profiles.length }}</span>
@@ -77,15 +77,15 @@
             </div>
           </div>
 
-          <!-- Profiles List Preview -->
+
           <div v-if="profiles.length > 0" class="profiles-preview">
             <div class="preview-header">
               <span class="preview-title">{{ t('step2.generatedProfiles') }}</span>
             </div>
             <div class="profiles-list">
-              <div 
-                v-for="(profile, idx) in profiles" 
-                :key="idx" 
+              <div
+                v-for="(profile, idx) in profiles"
+                :key="idx"
                 class="profile-card"
                 @click="selectProfile(profile)"
               >
@@ -98,9 +98,9 @@
                 </div>
                 <p class="profile-bio">{{ profile.bio || t('common.label.noBio') }}</p>
                 <div v-if="profile.interested_topics?.length" class="profile-topics">
-                  <span 
-                    v-for="topic in profile.interested_topics.slice(0, 3)" 
-                    :key="topic" 
+                  <span
+                    v-for="topic in profile.interested_topics.slice(0, 3)"
+                    :key="topic"
                     class="topic-tag"
                   >{{ topic }}</span>
                   <span v-if="profile.interested_topics.length > 3" class="topic-more">
@@ -113,7 +113,7 @@
         </div>
       </div>
 
-      <!-- Step 03: 生成双平台模拟配置 -->
+
       <div class="step-card" :class="{ 'active': phase === 2, 'completed': phase > 2 }">
         <div class="card-header">
           <div class="step-info">
@@ -132,10 +132,10 @@
           <p class="description">
             {{ t('step2.configDesc') }}
           </p>
-          
-          <!-- Config Preview -->
+
+
           <div v-if="simulationConfig" class="config-detail-panel">
-            <!-- 时间配置 -->
+
             <div class="config-block">
               <div class="config-grid">
                 <div class="config-item">
@@ -179,19 +179,19 @@
               </div>
             </div>
 
-            <!-- Agent 配置 -->
+
             <div class="config-block">
               <div class="config-block-header">
                 <span class="config-block-title">{{ t('step2.agentConfig') }}</span>
                 <span class="config-block-badge">{{ simulationConfig.agent_configs?.length || 0 }} {{ t('step2.countSuffix') }}</span>
               </div>
               <div class="agents-cards">
-                <div 
-                  v-for="agent in simulationConfig.agent_configs" 
-                  :key="agent.agent_id" 
+                <div
+                  v-for="agent in simulationConfig.agent_configs"
+                  :key="agent.agent_id"
                   class="agent-card"
                 >
-                  <!-- 卡片头部 -->
+
                   <div class="agent-card-header">
                     <div class="agent-identity">
                       <span class="agent-id">Agent {{ agent.agent_id }}</span>
@@ -202,14 +202,14 @@
                       <span class="agent-stance" :class="'stance-' + agent.stance">{{ agent.stance }}</span>
                     </div>
                   </div>
-                  
-                  <!-- 活跃时间轴 -->
+
+
                   <div class="agent-timeline">
                     <span class="timeline-label">{{ t('step2.activeHours') }}</span>
                     <div class="mini-timeline">
-                      <div 
-                        v-for="hour in 24" 
-                        :key="hour - 1" 
+                      <div
+                        v-for="hour in 24"
+                        :key="hour - 1"
                         class="timeline-hour"
                         :class="{ 'active': agent.active_hours?.includes(hour - 1) }"
                         :title="`${hour - 1}:00`"
@@ -224,7 +224,7 @@
                     </div>
                   </div>
 
-                  <!-- 行为参数 -->
+
                   <div class="agent-params">
                     <div class="param-group">
                       <div class="param-item">
@@ -264,7 +264,7 @@
               </div>
             </div>
 
-            <!-- 平台配置 -->
+
             <div class="config-block">
               <div class="config-block-header">
                 <span class="config-block-title">{{ t('step2.recommenderConfig') }}</span>
@@ -327,15 +327,15 @@
               </div>
             </div>
 
-            <!-- LLM 配置推理 -->
+
             <div v-if="simulationConfig.generation_reasoning" class="config-block">
               <div class="config-block-header">
                 <span class="config-block-title">{{ t('step2.llmReasoning') }}</span>
               </div>
               <div class="reasoning-content">
-                <div 
-                  v-for="(reason, idx) in simulationConfig.generation_reasoning.split('|').slice(0, 2)" 
-                  :key="idx" 
+                <div
+                  v-for="(reason, idx) in simulationConfig.generation_reasoning.split('|').slice(0, 2)"
+                  :key="idx"
                   class="reasoning-item"
                 >
                   <p class="reasoning-text">{{ reason.trim() }}</p>
@@ -346,7 +346,7 @@
         </div>
       </div>
 
-      <!-- Step 04: 初始激活编排 -->
+
       <div class="step-card" :class="{ 'active': phase === 3, 'completed': phase > 3 }">
         <div class="card-header">
           <div class="step-info">
@@ -367,7 +367,7 @@
           </p>
 
           <div v-if="simulationConfig?.event_config" class="orchestration-content">
-            <!-- 叙事方向 -->
+
             <div class="narrative-box">
               <span class="box-label narrative-label">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="special-icon">
@@ -385,7 +385,7 @@
               <p class="narrative-text">{{ simulationConfig.event_config.narrative_direction }}</p>
             </div>
 
-            <!-- 热点话题 -->
+
             <div class="topics-section">
               <span class="box-label">{{ t('step2.initialHotTopics') }}</span>
               <div class="hot-topics-grid">
@@ -395,7 +395,7 @@
               </div>
             </div>
 
-            <!-- 初始帖子流 -->
+
             <div class="initial-posts-section">
               <span class="box-label">{{ t('step2.initialActivation') }} ({{ simulationConfig.event_config.initial_posts.length }})</span>
               <div class="posts-timeline">
@@ -418,7 +418,7 @@
         </div>
       </div>
 
-      <!-- Step 05: 准备完成 -->
+
       <div class="step-card" :class="{ 'active': phase === 4 }">
         <div class="card-header">
           <div class="step-info">
@@ -434,8 +434,8 @@
         <div class="card-content">
           <p class="api-note">POST /api/simulation/start</p>
           <p class="description">{{ t('step2.readyDesc') }}</p>
-          
-          <!-- 模拟轮数配置 - 只有在配置生成完成且轮数计算出来后才显示 -->
+
+
           <div v-if="simulationConfig && autoGeneratedRounds" class="rounds-config-section">
             <div class="rounds-header">
               <div class="header-left">
@@ -448,7 +448,7 @@
                 <span class="switch-label">{{ t('step2.custom') }}</span>
               </label>
             </div>
-            
+
             <Transition name="fade" mode="out-in">
               <div v-if="useCustomRounds" class="rounds-content custom" key="custom">
                 <div class="slider-display">
@@ -462,10 +462,10 @@
                 </div>
 
                 <div class="range-wrapper">
-                  <input 
-                    type="range" 
-                    v-model.number="customMaxRounds" 
-                    min="10" 
+                  <input
+                    type="range"
+                    v-model.number="customMaxRounds"
+                    min="10"
                     :max="autoGeneratedRounds"
                     step="5"
                     class="minimal-slider"
@@ -473,8 +473,8 @@
                   />
                   <div class="range-marks">
                     <span>10</span>
-                    <span 
-                      class="mark-recommend" 
+                    <span
+                      class="mark-recommend"
                       :class="{ active: customMaxRounds === 40 }"
                       @click="customMaxRounds = 40"
                       :style="{ position: 'absolute', left: `calc(${(40 - 10) / (autoGeneratedRounds - 10) * 100}% - 30px)` }"
@@ -483,7 +483,7 @@
                   </div>
                 </div>
               </div>
-              
+
               <div v-else class="rounds-content auto" key="auto">
                 <div class="auto-info-card">
                   <div class="auto-value">
@@ -510,13 +510,13 @@
           </div>
 
           <div class="action-group dual">
-            <button 
+            <button
               class="action-btn secondary"
               @click="$emit('go-back')"
             >
               {{ t('step2.backToGraph') }}
             </button>
-            <button 
+            <button
               class="action-btn primary"
               :disabled="phase < 4"
               @click="handleStartSimulation"
@@ -528,7 +528,7 @@
       </div>
     </div>
 
-    <!-- Profile Detail Modal -->
+
     <Transition name="modal">
       <div v-if="selectedProfile" class="profile-modal-overlay" @click.self="selectedProfile = null">
         <div class="profile-modal">
@@ -542,9 +542,9 @@
           </div>
           <button class="close-btn" @click="selectedProfile = null">×</button>
         </div>
-        
+
         <div class="modal-body">
-          <!-- 基本信息 -->
+
           <div class="modal-info-grid">
             <div class="info-item">
               <span class="info-label">{{ t('step2.age') }}</span>
@@ -564,29 +564,28 @@
             </div>
           </div>
 
-          <!-- 简介 -->
+
           <div class="modal-section">
             <span class="section-label">{{ t('step2.bio') }}</span>
             <p class="section-bio">{{ selectedProfile.bio || t('common.label.noBio') }}</p>
           </div>
 
-          <!-- 关注话题 -->
+
           <div class="modal-section" v-if="selectedProfile.interested_topics?.length">
             <span class="section-label">{{ t('step2.relatedTopics') }}</span>
             <div class="topics-grid">
-              <span 
-                v-for="topic in selectedProfile.interested_topics" 
-                :key="topic" 
+              <span
+                v-for="topic in selectedProfile.interested_topics"
+                :key="topic"
                 class="topic-item"
               >{{ topic }}</span>
             </div>
           </div>
 
-          <!-- 详细人设 -->
+
           <div class="modal-section" v-if="selectedProfile.persona">
             <span class="section-label">{{ t('step2.detailedPersona') }}</span>
-            
-            <!-- 人设维度概览 -->
+
             <div class="persona-dimensions">
               <div class="dimension-card">
                 <span class="dim-title">{{ t('step2.fullExperience') }}</span>
@@ -615,7 +614,6 @@
       </div>
     </Transition>
 
-    <!-- Bottom Info / Logs -->
     <div class="system-logs">
       <div class="log-header">
         <span class="log-title">{{ t('common.label.systemDashboard') }}</span>
@@ -633,19 +631,19 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { 
-  prepareSimulation, 
-  getPrepareStatus, 
+import {
+  prepareSimulation,
+  getPrepareStatus,
   getSimulationProfilesRealtime,
   getSimulationConfig,
-  getSimulationConfigRealtime 
+  getSimulationConfigRealtime
 } from '../api/simulation'
 import { useLocale } from '../i18n'
 
 const { t, rt, locale } = useLocale()
 
 const props = defineProps({
-  simulationId: String,  // 从父组件传入
+  simulationId: String,  // 상위 구성요소에서 전달됨
   projectData: Object,
   graphData: Object,
   systemLogs: Array
@@ -654,7 +652,7 @@ const props = defineProps({
 const emit = defineEmits(['go-back', 'next-step', 'add-log', 'update-status'])
 
 // State
-const phase = ref(0) // 0: 初始化, 1: 生成人设, 2: 生成配置, 3: 完成
+const phase = ref(0) // 0: 초기화, 1: 캐릭터 생성, 2: 구성 생성, 3: 마치다
 const taskId = ref(null)
 const prepareProgress = ref(0)
 const currentStage = ref('')
@@ -666,43 +664,43 @@ const simulationConfig = ref(null)
 const selectedProfile = ref(null)
 const showProfilesDetail = ref(true)
 
-// 日志去重：记录上一次输出的关键信息
+// 로그 중복 제거: 마지막 출력의 주요 정보를 기록합니다.
 let lastLoggedMessage = ''
 let lastLoggedProfileCount = 0
 let lastLoggedConfigStage = ''
 
-// 模拟轮数配置
-const useCustomRounds = ref(false) // 默认使用自动配置轮数
-const customMaxRounds = ref(40)   // 默认推荐40轮
+// 시뮬레이션 라운드 구성
+const useCustomRounds = ref(false) // 기본적으로 자동 구성 라운드 사용
+const customMaxRounds = ref(40)   // 기본적으로 40라운드가 권장됩니다.
 
 // Watch stage to update phase
 watch(currentStage, (newStage) => {
-  if (newStage === '生成Agent人设' || newStage === 'generating_profiles') {
+  if (newStage === '에이전트 페르소나 생성' || newStage === 'generating_profiles') {
     phase.value = 1
-  } else if (newStage === '生成模拟配置' || newStage === 'generating_config') {
+  } else if (newStage === '시뮬레이션 구성 생성' || newStage === 'generating_config') {
     phase.value = 2
-    // 进入配置生成阶段，开始轮询配置
+    // 구성 생성 단계에 진입하고 구성에 대한 폴링을 시작합니다.
     if (!configTimer) {
-      addLog('开始生成双平台模拟配置...')
+      addLog('듀얼 플랫폼 시뮬레이션 구성 생성 시작...')
       startConfigPolling()
     }
-  } else if (newStage === '准备模拟脚本' || newStage === 'copying_scripts') {
-    phase.value = 2 // 仍属于配置阶段
+  } else if (newStage === '시뮬레이션 스크립트 준비' || newStage === 'copying_scripts') {
+    phase.value = 2 // 아직 구성 단계입니다.
   }
 })
 
-// 从配置中计算自动生成的轮数（不使用硬编码默认值）
+// 구성에서 자동으로 생성된 라운드 계산(하드코딩된 기본값을 사용하지 않음)
 const autoGeneratedRounds = computed(() => {
   if (!simulationConfig.value?.time_config) {
-    return null // 配置未生成时返回 null
+    return null // 구성이 생성되지 않은 경우 null을 반환합니다.
   }
   const totalHours = simulationConfig.value.time_config.total_simulation_hours
   const minutesPerRound = simulationConfig.value.time_config.minutes_per_round
   if (!totalHours || !minutesPerRound) {
-    return null // 配置数据不完整时返回 null
+    return null // 구성 데이터가 불완전한 경우 null을 반환합니다.
   }
   const calculatedRounds = Math.floor((totalHours * 60) / minutesPerRound)
-  // 确保最大轮数不小于40（推荐值），避免滑动条范围异常
+  // 비정상적인 슬라이더 범위를 방지하려면 최대 라운드 수가 40(권장 값) 이상인지 확인하세요.
   return Math.max(calculatedRounds, 40)
 })
 
@@ -719,7 +717,7 @@ const displayProfiles = computed(() => {
   return profiles.value.slice(0, 6)
 })
 
-// 根据agent_id获取对应的username
+// 대리인에 따르면_id해당 사용자 이름을 가져옵니다
 const getAgentUsername = (agentId) => {
   if (profiles.value && profiles.value.length > agentId && agentId >= 0) {
     const profile = profiles.value[agentId]
@@ -728,7 +726,7 @@ const getAgentUsername = (agentId) => {
   return `agent_${agentId}`
 }
 
-// 计算所有人设的关联话题总数
+// 모든 캐릭터에 대한 관련 주제의 총 개수를 계산합니다.
 const totalTopicsCount = computed(() => {
   return profiles.value.reduce((sum, p) => {
     return sum + (p.interested_topics?.length || 0)
@@ -747,20 +745,20 @@ const addLog = (msg) => {
   emit('add-log', msg)
 }
 
-// 处理开始模拟按钮点击
+// 시뮬레이션 시작 버튼 클릭 처리
 const handleStartSimulation = () => {
-  // 构建传递给父组件的参数
+  // 상위 구성요소에 전달된 구성 매개변수
   const params = {}
-  
+
   if (useCustomRounds.value) {
-    // 用户自定义轮数，传递 max_rounds 参数
+    // 사용자 정의 라운드 수, 최대 통과_rounds 매개변수
     params.maxRounds = customMaxRounds.value
-    addLog(`开始模拟，自定义轮数: ${customMaxRounds.value} 轮`)
+    addLog(`시뮬레이션을 시작하고 라운드 수를 맞춤 설정하세요: ${customMaxRounds.value} 바퀴`)
   } else {
-    // 用户选择保持自动生成的轮数，不传递 max_rounds 参数
-    addLog(`开始模拟，使用自动配置轮数: ${autoGeneratedRounds.value} 轮`)
+    // 사용자는 자동 생성된 라운드 수를 유지하고 최대 라운드 수를 통과하지 않기로 선택합니다._rounds 매개변수
+    addLog(`라운드 수 자동 구성을 사용하여 시뮬레이션 시작: ${autoGeneratedRounds.value} 바퀴`)
   }
-  
+
   emit('next-step', params)
 }
 
@@ -775,58 +773,58 @@ const selectProfile = (profile) => {
   selectedProfile.value = profile
 }
 
-// 自动开始准备模拟
+// 자동으로 시뮬레이션 준비 시작
 const startPrepareSimulation = async () => {
   if (!props.simulationId) {
-    addLog('错误：缺少 simulationId')
+    addLog('오류: 시뮬레이션 ID가 누락되었습니다.')
     emit('update-status', 'error')
     return
   }
-  
-  // 标记第一步完成，开始第二步
+
+  // 첫 번째 단계를 완료로 표시하고 두 번째 단계를 시작하세요.
   phase.value = 1
-  addLog(`模拟实例已创建: ${props.simulationId}`)
-  addLog('正在准备模拟环境...')
+  addLog(`모의 인스턴스가 생성되었습니다.: ${props.simulationId}`)
+  addLog('시뮬레이션 환경 준비...')
   emit('update-status', 'processing')
-  
+
   try {
     const res = await prepareSimulation({
       simulation_id: props.simulationId,
       use_llm_for_profiles: true,
       parallel_profile_count: 5
     })
-    
+
     if (res.success && res.data) {
       if (res.data.already_prepared) {
-        addLog('检测到已有完成的准备工作，直接使用')
+        addLog('완료된 준비작업을 감지하여 직접 활용')
         await loadPreparedData()
         return
       }
-      
+
       taskId.value = res.data.task_id
-      addLog(`准备任务已启动`)
+      addLog(`준비 작업이 시작되었습니다.`)
       addLog(`  └─ Task ID: ${res.data.task_id}`)
-      
-      // 立即设置预期Agent总数（从prepare接口返回值获取）
+
+      // 예상되는 총 에이전트 수를 즉시 설정합니다(준비 인터페이스의 반환 값에서 가져옴).
       if (res.data.expected_entities_count) {
         expectedTotal.value = res.data.expected_entities_count
-        addLog(`从Zep图谱读取到 ${res.data.expected_entities_count} 个实体`)
+        addLog(`Zep 스펙트럼에서 읽기 ${res.data.expected_entities_count} 엔터티`)
         if (res.data.entity_types && res.data.entity_types.length > 0) {
-          addLog(`  └─ 实体类型: ${res.data.entity_types.join(', ')}`)
+          addLog(`  └─ 엔터티 유형: ${res.data.entity_types.join(', ')}`)
         }
       }
-      
-      addLog('开始轮询准备进度...')
-      // 开始轮询进度
+
+      addLog('투표 준비 진행 시작...')
+      // 폴링 진행 시작
       startPolling()
-      // 开始实时获取 Profiles
+      // 실시간으로 프로필 받기 시작
       startProfilesPolling()
     } else {
-      addLog(`准备失败: ${res.error || '未知错误'}`)
+      addLog(`실패를 준비하다: ${res.error || '알 수 없는 오류'}`)
       emit('update-status', 'error')
     }
   } catch (err) {
-    addLog(`准备异常: ${err.message}`)
+    addLog(`예외를 준비하다: ${err.message}`)
     emit('update-status', 'error')
   }
 }
@@ -855,25 +853,25 @@ const stopProfilesPolling = () => {
 
 const pollPrepareStatus = async () => {
   if (!taskId.value && !props.simulationId) return
-  
+
   try {
     const res = await getPrepareStatus({
       task_id: taskId.value,
       simulation_id: props.simulationId
     })
-    
+
     if (res.success && res.data) {
       const data = res.data
-      
-      // 更新进度
+
+      // 업데이트 진행
       prepareProgress.value = data.progress || 0
       progressMessage.value = data.message || ''
-      
-      // 解析阶段信息并输出详细日志
+
+      // 단계 정보를 구문 분석하고 자세한 로그를 출력합니다.
       if (data.progress_detail) {
         currentStage.value = data.progress_detail.current_stage_name || ''
-        
-        // 输出详细进度日志（避免重复）
+
+        // 자세한 진행 로그 출력(중복 방지)
         const detail = data.progress_detail
         const logKey = `${detail.current_stage}-${detail.current_item}-${detail.total_items}`
         if (logKey !== lastLoggedMessage && detail.item_description) {
@@ -886,57 +884,57 @@ const pollPrepareStatus = async () => {
           }
         }
       } else if (data.message) {
-        // 从消息中提取阶段
+        // 메시지에서 단계 추출
         const match = data.message.match(/\[(\d+)\/(\d+)\]\s*([^:]+)/)
         if (match) {
           currentStage.value = match[3].trim()
         }
-        // 输出消息日志（避免重复）
+        // 메시지 로그 출력(중복 방지)
         if (data.message !== lastLoggedMessage) {
           lastLoggedMessage = data.message
           addLog(data.message)
         }
       }
-      
-      // 检查是否完成
+
+      // 완료되었는지 확인
       if (data.status === 'completed' || data.status === 'ready' || data.already_prepared) {
-        addLog('✓ 准备工作已完成')
+        addLog('✓ 준비작업 완료')
         stopPolling()
         stopProfilesPolling()
         await loadPreparedData()
       } else if (data.status === 'failed') {
-        addLog(`✗ 准备失败: ${data.error || '未知错误'}`)
+        addLog(`✗ 실패를 준비하다: ${data.error || '알 수 없는 오류'}`)
         stopPolling()
         stopProfilesPolling()
       }
     }
   } catch (err) {
-    console.warn('轮询状态失败:', err)
+    console.warn('폴링 상태 실패:', err)
   }
 }
 
 const fetchProfilesRealtime = async () => {
   if (!props.simulationId) return
-  
+
   try {
     const res = await getSimulationProfilesRealtime(props.simulationId, 'reddit')
-    
+
     if (res.success && res.data) {
       const prevCount = profiles.value.length
       profiles.value = res.data.profiles || []
-      // 只有当 API 返回有效值时才更新，避免覆盖已有的有效值
+      // 기존의 유효한 값을 덮어쓰지 않으려면 API가 유효한 값을 반환할 때만 업데이트하세요.
       if (res.data.total_expected) {
         expectedTotal.value = res.data.total_expected
       }
-      
-      // 提取实体类型
+
+      // 엔터티 유형 추출
       const types = new Set()
       profiles.value.forEach(p => {
         if (p.entity_type) types.add(p.entity_type)
       })
       entityTypes.value = Array.from(types)
-      
-      // 输出 Profile 生成进度日志（仅当数量变化时）
+
+      // 출력 프로필은 진행 로그를 생성합니다(수량이 변경되는 경우에만).
       const currentCount = profiles.value.length
       if (currentCount > 0 && currentCount !== lastLoggedProfileCount) {
         lastLoggedProfileCount = currentCount
@@ -944,22 +942,22 @@ const fetchProfilesRealtime = async () => {
         const latestProfile = profiles.value[currentCount - 1]
         const profileName = latestProfile?.name || latestProfile?.username || `Agent_${currentCount}`
         if (currentCount === 1) {
-          addLog(`开始生成Agent人设...`)
+          addLog(`에이전트 프로필 생성 시작...`)
         }
-        addLog(`→ Agent人设 ${currentCount}/${total}: ${profileName} (${latestProfile?.profession || '未知职业'})`)
-        
-        // 如果全部生成完成
+        addLog(`→ Agent성격 ${currentCount}/${total}: ${profileName} (${latestProfile?.profession || '직업불명'})`)
+
+        // 모든 생성이 완료되면
         if (expectedTotal.value && currentCount >= expectedTotal.value) {
-          addLog(`✓ 全部 ${currentCount} 个Agent人设生成完成`)
+          addLog(`✓ 모두 ${currentCount} 상담원 프로필 생성 완료`)
         }
       }
     }
   } catch (err) {
-    console.warn('获取 Profiles 失败:', err)
+    console.warn('프로필을 가져오지 못했습니다.:', err)
   }
 }
 
-// 配置轮询
+// 폴링 구성
 const startConfigPolling = () => {
   configTimer = setInterval(fetchConfigRealtime, 2000)
 }
@@ -973,94 +971,94 @@ const stopConfigPolling = () => {
 
 const fetchConfigRealtime = async () => {
   if (!props.simulationId) return
-  
+
   try {
     const res = await getSimulationConfigRealtime(props.simulationId)
-    
+
     if (res.success && res.data) {
       const data = res.data
-      
-      // 输出配置生成阶段日志（避免重复）
+
+      // 출력 구성 생성 단계 로그(중복 방지를 위해)
       if (data.generation_stage && data.generation_stage !== lastLoggedConfigStage) {
         lastLoggedConfigStage = data.generation_stage
         if (data.generation_stage === 'generating_profiles') {
-          addLog('正在生成Agent人设配置...')
+          addLog('에이전트 프로필 구성 생성 중...')
         } else if (data.generation_stage === 'generating_config') {
-          addLog('正在调用LLM生成模拟配置参数...')
+          addLog('LLM을 호출하여 시뮬레이션 구성 매개변수 생성...')
         }
       }
-      
-      // 如果配置已生成
+
+      // 구성이 생성된 경우
       if (data.config_generated && data.config) {
         simulationConfig.value = data.config
-        addLog('✓ 模拟配置生成完成')
-        
-        // 显示详细配置摘要
+        addLog('✓ 시뮬레이션 구성 생성 완료')
+
+        // 자세한 구성 요약 표시
         if (data.summary) {
-          addLog(`  ├─ Agent数量: ${data.summary.total_agents}个`)
-          addLog(`  ├─ 模拟时长: ${data.summary.simulation_hours}小时`)
-          addLog(`  ├─ 初始帖子: ${data.summary.initial_posts_count}条`)
-          addLog(`  ├─ 热点话题: ${data.summary.hot_topics_count}个`)
-          addLog(`  └─ 平台配置: Twitter ${data.summary.has_twitter_config ? '✓' : '✗'}, Reddit ${data.summary.has_reddit_config ? '✓' : '✗'}`)
+          addLog(`  ├─ Agent수량: ${data.summary.total_agents}개인`)
+          addLog(`  ├─ 시뮬레이션 기간: ${data.summary.simulation_hours}시간`)
+          addLog(`  ├─ 초기 게시물: ${data.summary.initial_posts_count}조각`)
+          addLog(`  ├─ 뜨거운 주제: ${data.summary.hot_topics_count}개인`)
+          addLog(`  └─ 플랫폼 구성: Twitter ${data.summary.has_twitter_config ? '✓' : '✗'}, Reddit ${data.summary.has_reddit_config ? '✓' : '✗'}`)
         }
-        
-        // 显示时间配置详情
+
+        // 시간 구성 세부정보 표시
         if (data.config.time_config) {
           const tc = data.config.time_config
-          addLog(`时间配置: 每轮${tc.minutes_per_round}分钟, 共${Math.floor((tc.total_simulation_hours * 60) / tc.minutes_per_round)}轮`)
+          addLog(`시간 구성: 매 라운드${tc.minutes_per_round}분, 흔한${Math.floor((tc.total_simulation_hours * 60) / tc.minutes_per_round)}바퀴`)
         }
-        
-        // 显示事件配置
+
+        // 이벤트 구성 표시
         if (data.config.event_config?.narrative_direction) {
           const narrative = data.config.event_config.narrative_direction
-          addLog(`叙事方向: ${narrative.length > 50 ? narrative.substring(0, 50) + '...' : narrative}`)
+          addLog(`내러티브 방향: ${narrative.length > 50 ? narrative.substring(0, 50) + '...' : narrative}`)
         }
-        
+
         stopConfigPolling()
         phase.value = 4
-        addLog('✓ 环境搭建完成，可以开始模拟')
+        addLog('✓ 환경이 설정되고 시뮬레이션을 시작할 수 있습니다.')
         emit('update-status', 'completed')
       }
     }
   } catch (err) {
-    console.warn('获取 Config 失败:', err)
+    console.warn('구성을 가져오지 못했습니다.:', err)
   }
 }
 
 const loadPreparedData = async () => {
   phase.value = 2
-  addLog('正在加载已有配置数据...')
+  addLog('기존 구성 데이터 로드...')
 
-  // 最后获取一次 Profiles
+  // 지난번에 프로필 가져오기
   await fetchProfilesRealtime()
-  addLog(`已加载 ${profiles.value.length} 个Agent人设`)
+  addLog(`짐을 실은 ${profiles.value.length} 상담원 프로필`)
 
-  // 获取配置（使用实时接口）
+  // 구성 가져오기(실시간 인터페이스 사용)
   try {
     const res = await getSimulationConfigRealtime(props.simulationId)
     if (res.success && res.data) {
       if (res.data.config_generated && res.data.config) {
         simulationConfig.value = res.data.config
-        addLog('✓ 模拟配置加载成功')
-        
-        // 显示详细配置摘要
+        addLog('✓ 시뮬레이션 구성이 성공적으로 로드되었습니다.')
+
+        // 자세한 구성 요약 표시
         if (res.data.summary) {
-          addLog(`  ├─ Agent数量: ${res.data.summary.total_agents}个`)
-          addLog(`  ├─ 模拟时长: ${res.data.summary.simulation_hours}小时`)
-          addLog(`  └─ 初始帖子: ${res.data.summary.initial_posts_count}条`)
+          addLog(`  ├─ Agent수량: ${res.data.summary.total_agents}개인`)
+          addLog(`  ├─ 시뮬레이션 기간: ${res.data.summary.simulation_hours}시간`)
+          addLog(`  └─ 초기 게시물: ${res.data.summary.initial_posts_count}조각`)
         }
-        
-        addLog('✓ 环境搭建完成，可以开始模拟')
+
+        addLog('✓ 환경이 설정되고 시뮬레이션을 시작할 수 있습니다.')
         phase.value = 4
         emit('update-status', 'completed')
       } else {
-        // 配置尚未生成，开始轮询
-        addLog('配置生成中，开始轮询等待...')
+        // 구성이 아직 생성되지 않았습니다. 폴링을 시작하세요.
+        addLog('구성이 생성 중이며 폴링을 시작하고 대기 중입니다....')
         startConfigPolling()
       }
     }
   } catch (err) {
-    addLog(`加载配置失败: ${err.message}`)
+    addLog(`구성을 로드하지 못했습니다.: ${err.message}`)
     emit('update-status', 'error')
   }
 }
@@ -1076,9 +1074,9 @@ watch(() => props.systemLogs?.length, () => {
 })
 
 onMounted(() => {
-  // 自动开始准备流程
+  // 자동으로 준비 프로세스 시작
   if (props.simulationId) {
-    addLog('Step2 环境搭建初始化')
+    addLog('Step2 환경설정 초기화')
     startPrepareSimulation()
   }
 })
@@ -1912,7 +1910,7 @@ onUnmounted(() => {
   flex: 1;
 }
 
-/* 基本信息网格 */
+/* 기본정보 그리드 */
 .modal-info-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1948,7 +1946,7 @@ onUnmounted(() => {
   color: #FF5722;
 }
 
-/* 模块区域 */
+/* 모듈 영역 */
 .modal-section {
   margin-bottom: 28px;
 }
@@ -1974,7 +1972,7 @@ onUnmounted(() => {
   border-left: 3px solid #E0E0E0;
 }
 
-/* 话题标签 */
+/* 해시태그 */
 .topics-grid {
   display: flex;
   flex-wrap: wrap;
@@ -1996,7 +1994,7 @@ onUnmounted(() => {
   color: #0D47A1;
 }
 
-/* 详细人设 */
+/* 디테일한 캐릭터 디자인 */
 .persona-dimensions {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -2282,7 +2280,7 @@ onUnmounted(() => {
   margin: 0;
 }
 
-/* 模拟轮数配置样式 */
+/* 시뮬레이션 라운드 구성 스타일 */
 .rounds-config-section {
   margin: 24px 0;
   padding-top: 24px;

@@ -1,15 +1,15 @@
 <template>
   <div class="main-view">
-    <!-- Header -->
+
     <header class="app-header">
       <div class="header-left">
         <div class="brand" @click="router.push('/')">MIROFISH</div>
       </div>
-      
+
       <div class="header-center">
         <div class="view-switcher">
-          <button 
-            v-for="mode in ['graph', 'split', 'workbench']" 
+          <button
+            v-for="mode in ['graph', 'split', 'workbench']"
             :key="mode"
             class="switch-btn"
             :class="{ active: viewMode === mode }"
@@ -33,11 +33,11 @@
       </div>
     </header>
 
-    <!-- Main Content Area -->
+
     <main class="content-area">
-      <!-- Left Panel: Graph -->
+
       <div class="panel-wrapper left" :style="leftPanelStyle">
-        <GraphPanel 
+        <GraphPanel
           :graphData="graphData"
           :loading="graphLoading"
           :currentPhase="3"
@@ -47,7 +47,7 @@
         />
       </div>
 
-      <!-- Right Panel: Step 3 simulation -->
+
       <div class="panel-wrapper right" :style="rightPanelStyle">
         <Step3Simulation
           :simulationId="currentSimulationId"
@@ -153,16 +153,16 @@ const toggleMaximize = (target) => {
 
 const handleGoBack = async () => {
   addLog('Step 2로 돌아가기 전에 시뮬레이션을 종료하는 중...')
-  
+
   stopGraphRefresh()
-  
+
   try {
     const envStatusRes = await getEnvStatus({ simulation_id: currentSimulationId.value })
-    
+
     if (envStatusRes.success && envStatusRes.data?.env_alive) {
       addLog('시뮬레이션 환경을 종료하는 중...')
       try {
-        await closeSimulationEnv({ 
+        await closeSimulationEnv({
           simulation_id: currentSimulationId.value,
           timeout: 10
         })
@@ -190,7 +190,7 @@ const handleGoBack = async () => {
   } catch (err) {
     addLog(`시뮬레이션 상태 확인 실패: ${err.message}`)
   }
-  
+
   router.push({ name: 'Simulation', params: { simulationId: currentSimulationId.value } })
 }
 
@@ -202,11 +202,11 @@ const handleNextStep = () => {
 const loadSimulationData = async () => {
   try {
     addLog(`시뮬레이션 데이터를 불러오는 중: ${currentSimulationId.value}`)
-    
+
     const simRes = await getSimulation(currentSimulationId.value)
     if (simRes.success && simRes.data) {
       const simData = simRes.data
-      
+
       try {
         const configRes = await getSimulationConfig(currentSimulationId.value)
         if (configRes.success && configRes.data?.time_config?.minutes_per_round) {
@@ -216,13 +216,13 @@ const loadSimulationData = async () => {
       } catch (configErr) {
         addLog(`시간 설정을 불러오지 못해 기본값을 사용합니다: 라운드당 ${minutesPerRound.value}분`)
       }
-      
+
       if (simData.project_id) {
         const projRes = await getProject(simData.project_id)
         if (projRes.success && projRes.data) {
           projectData.value = projRes.data
           addLog(`프로젝트 로드 성공: ${projRes.data.project_id}`)
-          
+
           if (projRes.data.graph_id) {
             await loadGraph(projRes.data.graph_id)
           }
@@ -240,7 +240,7 @@ const loadGraph = async (graphId) => {
   if (!isSimulating.value) {
     graphLoading.value = true
   }
-  
+
   try {
     const res = await getGraphData(graphId)
     if (res.success) {
@@ -289,11 +289,11 @@ watch(isSimulating, (newValue) => {
 
 onMounted(() => {
   addLog('SimulationRunView 초기화')
-  
+
   if (maxRounds.value) {
     addLog(`사용자 지정 시뮬레이션 라운드 수: ${maxRounds.value}`)
   }
-  
+
   loadSimulationData()
 })
 

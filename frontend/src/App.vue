@@ -36,7 +36,7 @@ watch(
 </script>
 
 <style>
-/* 全局样式重置 */
+/* 전역 스타일 재설정 */
 * {
   margin: 0;
   padding: 0;
@@ -96,7 +96,7 @@ watch(
   color: #ffffff;
 }
 
-/* 滚动条样式 */
+/* 스크롤바 스타일 */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -114,7 +114,7 @@ watch(
   background: #333333;
 }
 
-/* 全局按钮样式 */
+/* 전역 버튼 스타일 */
 button {
   font-family: inherit;
 }

@@ -81,6 +81,7 @@ import GraphPanel from '../components/GraphPanel.vue'
 import Step1GraphBuild from '../components/Step1GraphBuild.vue'
 import Step2EnvSetup from '../components/Step2EnvSetup.vue'
 import { generateOntology, getProject, buildGraph, getTaskStatus, getGraphData } from '../api/graph'
+import { getBridgeHealth } from '../api'
 import { getPendingUpload, clearPendingUpload } from '../store/pendingUpload'
 import { useLocale } from '../i18n'
 
@@ -199,6 +200,31 @@ const initProject = async () => {
   }
 }
 
+const checkBridgeBeforeOntology = async () => {
+  try {
+    const bridge = await getBridgeHealth()
+
+    if (!bridge?.ok || !bridge?.codexAvailable) {
+      throw new Error('Local bridge is unavailable. Check http://127.0.0.1:8787/health and restart dev:all if needed.')
+    }
+
+    if (bridge.busy) {
+      const queued = Number.isFinite(bridge.queueDepth) ? bridge.queueDepth : 0
+      addLog(`Local bridge is currently busy. Ontology generation will wait in queue${queued > 0 ? ` (${queued} ahead)` : ''}.`)
+      ontologyProgress.value = {
+        message: queued > 0
+          ? `Local bridge busy. Queued behind ${queued} request(s)...`
+          : 'Local bridge busy. Waiting for the current request to finish...'
+      }
+    }
+  } catch (err) {
+    throw new Error(
+      err?.message ||
+      'Failed to reach the local bridge. Make sure dev:all is running and bridge health is reachable.'
+    )
+  }
+}
+
 const handleNewProject = async () => {
   const pending = getPendingUpload()
   if (!pending.isPending || pending.files.length === 0) {
@@ -212,6 +238,8 @@ const handleNewProject = async () => {
     currentPhase.value = 0
     ontologyProgress.value = { message: 'Uploading and analyzing docs...' }
     addLog('Starting ontology generation: Uploading files...')
+
+    await checkBridgeBeforeOntology()
 
     const formData = new FormData()
     pending.files.forEach(f => formData.append('files', f))

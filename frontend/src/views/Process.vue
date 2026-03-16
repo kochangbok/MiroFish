@@ -378,6 +378,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { generateOntology, getProject, buildGraph, getTaskStatus, getGraphData } from '../api/graph'
+import { getBridgeHealth } from '../api'
 import { createSimulation } from '../api/simulation'
 import { getPendingUpload, clearPendingUpload } from '../store/pendingUpload'
 import * as d3 from 'd3'
@@ -551,6 +552,23 @@ const initProject = async () => {
   }
 }
 
+const checkBridgeBeforeOntology = async () => {
+  const bridge = await getBridgeHealth()
+
+  if (!bridge?.ok || !bridge?.codexAvailable) {
+    throw new Error('로컬 브리지를 사용할 수 없습니다. dev:all을 다시 실행하고 http://127.0.0.1:8787/health 를 확인해 주세요.')
+  }
+
+  if (bridge.busy) {
+    const queued = Number.isFinite(bridge.queueDepth) ? bridge.queueDepth : 0
+    ontologyProgress.value = {
+      message: queued > 0
+        ? `로컬 브리지가 사용 중입니다. 현재 요청 뒤에 ${queued}건 대기 중입니다...`
+        : '로컬 브리지가 사용 중입니다. 현재 요청이 끝날 때까지 기다리는 중입니다...'
+    }
+  }
+}
+
 // 새로운 프로젝트 처리 - 온톨로지 호출/generate API
 const handleNewProject = async () => {
   const pending = getPendingUpload()
@@ -565,6 +583,8 @@ const handleNewProject = async () => {
     loading.value = true
     currentPhase.value = 0 // 온톨로지 생성 단계
     ontologyProgress.value = { message: '파일 업로드 및 문서 분석...' }
+
+    await checkBridgeBeforeOntology()
 
     // FormData 빌드
     const formDataObj = new FormData()

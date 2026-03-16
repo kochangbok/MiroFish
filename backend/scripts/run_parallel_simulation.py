@@ -156,6 +156,7 @@ def init_logging_for_simulation(simulation_dir: str):
 
 
 from action_logger import SimulationLogManager, PlatformActionLogger
+from app.utils.active_hours import normalize_active_hours
 
 try:
     from camel.models import ModelFactory
@@ -1065,7 +1066,10 @@ def get_active_agents_for_round(
     candidates = []
     for cfg in agent_configs:
         agent_id = cfg.get("agent_id", 0)
-        active_hours = cfg.get("active_hours", list(range(8, 23)))
+        active_hours = normalize_active_hours(
+            cfg.get("active_hours"),
+            default=list(range(8, 23))
+        )
         activity_level = cfg.get("activity_level", 0.5)
         
         if current_hour not in active_hours:

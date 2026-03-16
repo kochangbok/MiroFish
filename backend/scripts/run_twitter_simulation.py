@@ -48,6 +48,7 @@ else:
 
 
 import re
+from app.utils.active_hours import normalize_active_hours
 
 
 class UnicodeFormatter(logging.Formatter):
@@ -500,7 +501,10 @@ class TwitterSimulationRunner:
         candidates = []
         for cfg in agent_configs:
             agent_id = cfg.get("agent_id", 0)
-            active_hours = cfg.get("active_hours", list(range(8, 23)))
+            active_hours = normalize_active_hours(
+                cfg.get("active_hours"),
+                default=list(range(8, 23))
+            )
             activity_level = cfg.get("activity_level", 0.5)
             
             # 检查是否在活跃时间

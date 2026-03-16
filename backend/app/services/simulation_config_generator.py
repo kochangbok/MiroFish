@@ -20,6 +20,7 @@ from openai import OpenAI
 
 from ..config import Config
 from ..utils.logger import get_logger
+from ..utils.active_hours import normalize_active_hours
 from .zep_entity_reader import EntityNode, ZepEntityReader
 
 logger = get_logger('mirofish.simulation_config')
@@ -847,6 +848,9 @@ class SimulationConfigGenerator:
 - **개인**(Student/Person/Alumni): 활동도 높음(0.6~0.9), 저녁 중심(18~23), 반응 빠름(1~15분), 영향력 낮음(0.8~1.2)
 - **전문가/오피니언 리더**: 활동도 중간(0.4~0.6), 영향력 중상(1.5~2.0)
 - 단, 위 수치는 고정값이 아니라 사건 맥락과 요약 정보를 보고 조정해야 합니다.
+- **중요**: active_hours는 반드시 0~23 사이의 정수 배열로만 반환하세요.
+  - 예: [8, 9, 10, 11, 12, 13, 18, 19, 20, 21, 22]
+  - 금지 예시: ["08:00-23:00"], ["9-17"], ["09:00", "10:00"]
 
 반환 형식(JSON only):
 {{
@@ -856,7 +860,7 @@ class SimulationConfigGenerator:
             "activity_level": <0.0-1.0>,
             "posts_per_hour": <게시 빈도>,
             "comments_per_hour": <댓글 빈도>,
-            "active_hours": [<활동 시간대 목록>],
+            "active_hours": [<0~23 정수 시간대 목록>],
             "response_delay_min": <최소 반응 지연(분)>,
             "response_delay_max": <최대 반응 지연(분)>,
             "sentiment_bias": <-1.0~1.0>,
@@ -893,7 +897,10 @@ class SimulationConfigGenerator:
                 activity_level=cfg.get("activity_level", 0.5),
                 posts_per_hour=cfg.get("posts_per_hour", 0.5),
                 comments_per_hour=cfg.get("comments_per_hour", 1.0),
-                active_hours=cfg.get("active_hours", list(range(9, 23))),
+                active_hours=normalize_active_hours(
+                    cfg.get("active_hours"),
+                    default=list(range(9, 23))
+                ),
                 response_delay_min=cfg.get("response_delay_min", 5),
                 response_delay_max=cfg.get("response_delay_max", 60),
                 sentiment_bias=cfg.get("sentiment_bias", 0.0),
@@ -986,5 +993,3 @@ class SimulationConfigGenerator:
                 "stance": "neutral",
                 "influence_weight": 1.0
             }
-
-

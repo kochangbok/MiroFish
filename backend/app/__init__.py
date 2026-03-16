@@ -4,6 +4,8 @@ MiroFish Backend - Flask应用工厂
 
 import os
 import warnings
+import urllib.request
+from urllib.parse import urlparse
 
 # 抑制 multiprocessing resource_tracker 的警告（来自第三方库如 transformers）
 # 需要在所有其他导入之前设置
@@ -72,9 +74,35 @@ def create_app(config_class=Config):
     @app.route('/health')
     def health():
         return {'status': 'ok', 'service': 'MiroFish Backend'}
+
+    @app.route('/api/system/bridge-health')
+    def bridge_health():
+        base_url = app.config.get('LLM_BASE_URL') or ''
+        if not base_url:
+            return {'ok': False, 'error': 'LLM_BASE_URL is not configured'}, 500
+
+        parsed = urlparse(base_url)
+        if parsed.scheme not in {'http', 'https'}:
+            return {'ok': False, 'error': f'Unsupported LLM_BASE_URL: {base_url}'}, 400
+
+        bridge_base = base_url[:-3] if base_url.endswith('/v1') else base_url.rstrip('/')
+        health_url = f'{bridge_base}/health'
+
+        try:
+            with urllib.request.urlopen(health_url, timeout=3) as response:
+                import json
+                payload = json.loads(response.read().decode('utf-8'))
+                return payload
+        except Exception as e:
+            return {
+                'ok': False,
+                'busy': None,
+                'queueDepth': None,
+                'error': f'Failed to reach bridge health endpoint: {e}',
+                'healthUrl': health_url,
+            }, 502
     
     if should_log_startup:
         logger.info("MiroFish Backend 启动完成")
     
     return app
-

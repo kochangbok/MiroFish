@@ -9,8 +9,6 @@ const service = axios.create({
   }
 })
 
-export const BRIDGE_HEALTH_URL = import.meta.env.VITE_BRIDGE_HEALTH_URL || 'http://127.0.0.1:8787/health'
-
 // 请求拦截器
 service.interceptors.request.use(
   config => {
@@ -68,7 +66,9 @@ export const requestWithRetry = async (requestFn, maxRetries = 3, delay = 1000) 
 }
 
 export const getBridgeHealth = async () => {
-  const response = await axios.get(BRIDGE_HEALTH_URL, {
+  const response = await service({
+    url: '/api/system/bridge-health',
+    method: 'get',
     timeout: 3000,
     headers: {
       'Cache-Control': 'no-cache'
